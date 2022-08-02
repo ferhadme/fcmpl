@@ -27,6 +27,8 @@ void put_test()
     put(trie, "cab");
     put(trie, "abcd");
     put(trie, "abz");
+    put(trie, "a");
+    put(trie, "");
 
     int aidx = hash('a');
     int bidx = hash('b');

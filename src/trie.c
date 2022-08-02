@@ -39,20 +39,15 @@ bool put(trie *trie, const char *word)
 	return false;
     }
     trie->size++;
-    printf("[Root]\n");
     int idx = hash(*word);
-    printf("put_node() function called with root for char %c\n", *word);
     *(trie->root->children + idx) = put_node(*(trie->root->children + idx), word);
     return true;
 }
 
 static node *put_node(node *parent, const char *word)
 {
-    printf("char %c is called\n", *word);
     if (parent == NULL) {
 	parent = create_node(*word);
-    } else {
-	printf("parent is not null, char is %c\n", parent->ch);
     }
     int idx = hash(*(word + 1));
     if (idx == -1) {
@@ -97,7 +92,6 @@ int hash(char ch)
     if (IS_LWR_LTR(ch)) {
 	return ch - 71;
     }
-    // assert(0 && "unreachable");
     return -1;
 }
 
