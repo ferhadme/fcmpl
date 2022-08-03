@@ -4,7 +4,7 @@
 #include <assert.h>
 #include "trie.h"
 
-static void traverse_trie(const node *n);
+static void traverse_trie(node *n);
 static bool validate_word(const char *word);
 static node *put_node(node *parent, const char *word);
 static node *create_node(char with);
@@ -66,21 +66,23 @@ bool check(const trie *trie, const char *word);
 
 void print_trie(const trie *trie)
 {
-    node *root = trie->root;
-    traverse_trie(root);
+    traverse_trie(trie->root);
 }
 
-static void traverse_trie(const node *n)
+static void traverse_trie(node *n)
 {
     if (n == NULL) {
 	return;
     }
     printf("%c", n->ch);
+    if (n->end_of_word && !n->visited) {
+	n->visited = true;
+	printf("\n");
+	traverse_trie(n);
+    }
+    n->visited = false;
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	traverse_trie(*(n->children + i));
-    }
-    if (n->end_of_word) {
-	printf("\n");
     }
 }
 
@@ -116,5 +118,6 @@ static node *create_node(char with)
 	*(n->children + i) = NULL;
     }
     n->end_of_word = false;
+    n->visited = false;
     return n;
 }

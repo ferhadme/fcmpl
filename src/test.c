@@ -18,9 +18,8 @@ C Z B
 |
 D
  */
-void put_test()
+void put_test(trie *trie)
 {
-    trie *trie = create_trie();
     put(trie, "ab");
     put(trie, "abc");
     put(trie, "db");
@@ -65,8 +64,6 @@ void put_test()
     node_test("abz", 3, l1_a->ch, l2_b->ch, l3_z->ch);
     node_test("db", 2, l1_d->ch, l2_b_1->ch);
     node_test("cab", 3, l1_c->ch, l2_a->ch, l3_b->ch);
-
-    // TODO: free trie
 }
 
 static void node_test(const char *word, int n_ch, ...)

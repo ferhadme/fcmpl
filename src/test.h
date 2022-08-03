@@ -1,10 +1,10 @@
 #ifndef TEST_H
 #define TEST_H
 
-void put_test();
+void put_test(trie *trie);
 
-void delete_test();
+void delete_test(trie *trie);
 
-void check_test();
+void check_test(trie *trie);
 
 #endif // TEST_H

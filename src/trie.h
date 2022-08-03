@@ -13,6 +13,7 @@ typedef struct node
     char ch;
     struct node **children;
     bool end_of_word;
+    bool visited;
 } node;
 
 typedef struct
