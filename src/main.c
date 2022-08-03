@@ -29,6 +29,7 @@ int main(int argc, char **argv) {
     trie *trie = create_trie();
     put_test(trie);
     print_trie(trie);
+    check_test(trie);
 
     // TODO: write interactive shell (REPL) that reads words
     // TODO: prints all possible completions for expected word

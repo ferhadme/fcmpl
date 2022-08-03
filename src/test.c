@@ -20,14 +20,18 @@ D
  */
 void put_test(trie *trie)
 {
-    put(trie, "ab");
-    put(trie, "abc");
-    put(trie, "db");
-    put(trie, "cab");
-    put(trie, "abcd");
-    put(trie, "abz");
-    put(trie, "a");
-    put(trie, "");
+    assert(put(trie, "ab"));
+    assert(put(trie, "abc"));
+    assert(put(trie, "db"));
+    assert(put(trie, "cab"));
+    assert(put(trie, "abcd"));
+    assert(put(trie, "abz"));
+    assert(put(trie, "a"));
+
+    assert(!put(trie, ""));
+    assert(!put(trie, "."));
+    assert(!put(trie, ".,m"));
+    assert(!put(trie, "m./,"));
 
     int aidx = hash('a');
     int bidx = hash('b');
@@ -78,4 +82,31 @@ static void node_test(const char *word, int n_ch, ...)
     va_end(ptr);
 
     assert(strcmp(word, res) == 0);
+}
+
+/*
+ * Assuming that check_test(trie) called after put_test(trie), so there are some data in trie to test check function
+ */
+void check_test(trie *trie)
+{
+    assert(check(trie, "a"));
+    assert(check(trie, "abc"));
+    assert(check(trie, "db"));
+    assert(check(trie, "cab"));
+    assert(check(trie, "abcd"));
+    assert(check(trie, "abz"));
+    assert(check(trie, "a"));
+
+    assert(!check(trie, ""));
+    assert(!check(trie, "b"));
+    assert(!check(trie, "ac"));
+    assert(!check(trie, "abzd"));
+    assert(!check(trie, "."));
+    assert(!check(trie, "cabb"));
+    assert(!check(trie, "abcde"));
+    assert(!check(trie, "dbd"));
+
+    assert(!check(trie, "."));
+    assert(!check(trie, ".,m"));
+    assert(!check(trie, "m./,"));
 }

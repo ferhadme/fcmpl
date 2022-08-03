@@ -4,10 +4,11 @@
 #include <assert.h>
 #include "trie.h"
 
-static void traverse_trie(node *n, char *prefix, int node_counter);
+static void traverse_trie(const node *n, char *prefix, int node_counter);
 static bool validate_word(const char *word);
 static node *put_node(node *parent, const char *word);
 static node *create_node(char with);
+static bool check_node(const node *trie, const char *word);
 
 
 trie *create_trie()
@@ -36,7 +37,9 @@ void free_trie(trie *trie)
 bool put(trie *trie, const char *word)
 {
     if (!validate_word(word)) {
+    if (!validate_word(word)) {
 	return false;
+    }
     }
     trie->size++;
     int idx = hash(*word);
@@ -61,8 +64,26 @@ static node *put_node(node *parent, const char *word)
 // TODO Implement function
 bool delete(const trie *trie, const char *word);
 
-// TODO Implement function
-bool check(const trie *trie, const char *word);
+bool check(const trie *trie, const char *word)
+{
+    if (!validate_word(word)) {
+	return false;
+    }
+    int idx = hash(*word);
+    return check_node(*(trie->root->children + idx), word);
+}
+
+static bool check_node(const node *n, const char *word)
+{
+    if (n == NULL) {
+	return false;
+    }
+    int idx = hash(*(word + 1));
+    if (idx == -1 && n != NULL) {
+	return n->end_of_word;
+    }
+    return check_node(*(n->children + idx), word + 1);
+}
 
 void print_trie(const trie *trie)
 {
@@ -72,7 +93,7 @@ void print_trie(const trie *trie)
     free(prefix);
 }
 
-static void traverse_trie(node *n, char *prefix, int node_counter)
+static void traverse_trie(const node *n, char *prefix, int node_counter)
 {
     if (n == NULL) {
 	return;
