@@ -7,8 +7,9 @@
 static void traverse_trie(const node *n, char *prefix, int node_counter);
 static bool validate_word(const char *word);
 static node *put_node(node *parent, const char *word);
-static node *create_node(char with);
 static bool check_node(const node *trie, const char *word);
+static bool delete_node(const node *n, const char *word);
+static node *create_node(char with);
 
 
 trie *create_trie()
@@ -37,9 +38,7 @@ void free_trie(trie *trie)
 bool put(trie *trie, const char *word)
 {
     if (!validate_word(word)) {
-    if (!validate_word(word)) {
 	return false;
-    }
     }
     trie->size++;
     int idx = hash(*word);
@@ -61,8 +60,11 @@ static node *put_node(node *parent, const char *word)
     return parent;
 }
 
-// TODO Implement function
+// TODO Implement
 bool delete(const trie *trie, const char *word);
+
+// TODO Implement
+static bool delete_node(const node *n, const char *word);
 
 bool check(const trie *trie, const char *word)
 {
