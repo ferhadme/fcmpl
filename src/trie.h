@@ -31,6 +31,8 @@ bool delete(const trie *trie, const char *word);
 
 bool check(const trie *trie, const char *word);
 
+void complete(const trie *trie, const char *word);
+
 void print_trie(const trie *trie);
 
 int hash(char ch);

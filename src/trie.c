@@ -8,7 +8,8 @@ static void traverse_trie(const node *n, char *prefix, int node_counter);
 static bool validate_word(const char *word);
 static node *put_node(node *parent, const char *word);
 static bool check_node(const node *trie, const char *word);
-static bool delete_node(const node *n, const char *word);
+// static bool delete_node(const node *n, const char *word);
+static node *get_final_node(node *n, const char *word);
 static node *create_node(char with);
 
 
@@ -61,10 +62,10 @@ static node *put_node(node *parent, const char *word)
 }
 
 // TODO Implement
-bool delete(const trie *trie, const char *word);
+// bool delete(const trie *trie, const char *word);
 
 // TODO Implement
-static bool delete_node(const node *n, const char *word);
+// static bool delete_node(const node *n, const char *word);
 
 bool check(const trie *trie, const char *word)
 {
@@ -87,10 +88,38 @@ static bool check_node(const node *n, const char *word)
     return check_node(*(n->children + idx), word + 1);
 }
 
+void complete(const trie *trie, const char *word)
+{
+    if (!validate_word(word)) {
+	return;
+    }
+    int idx = hash(*word);
+    node *n = get_final_node(*(trie->root->children + idx), word);
+
+    int node_counter = strlen(word);
+    char *prefix = malloc((sizeof(char) * node_counter) + 1);
+    strcpy(prefix, word);
+
+    traverse_trie(n, prefix, node_counter);
+    free(prefix);
+}
+
+static node *get_final_node(node *n, const char *word)
+{
+    if (n == NULL) {
+	return NULL;
+    }
+    int idx = hash(*(word + 1));
+    if (idx == -1 && n != NULL) {
+	return n;
+    }
+    return get_final_node(*(n->children + idx), word + 1);
+}
+
 void print_trie(const trie *trie)
 {
-    char *prefix = malloc(sizeof(char) + 1);
     int node_counter = 1;
+    char *prefix = malloc(sizeof(char) + 1);
     traverse_trie(trie->root, prefix, node_counter);
     free(prefix);
 }

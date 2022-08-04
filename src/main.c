@@ -31,6 +31,18 @@ int main(int argc, char **argv) {
     print_trie(trie);
     check_test(trie);
 
+    printf("Completion for ab\n");
+    complete(trie, "ab");
+    printf("-------------\n");
+
+    printf("Completion for a\n");
+    complete(trie, "a");
+    printf("-------------\n");
+
+    printf("Completion for cab\n");
+    complete(trie, "cab");
+    printf("-------------\n");
+
     // TODO: write interactive shell (REPL) that reads words
     // TODO: prints all possible completions for expected word
 

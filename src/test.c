@@ -1,10 +1,20 @@
 #include <assert.h>
+#include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
 #include "trie.h"
 #include "test.h"
 
 static void node_test(const char *word, int n_ch, ...);
+
+void test_all()
+{
+    trie *trie = create_trie();
+    put_test(trie);
+    check_test(trie);
+    printf("All tests are passed\n");
+    // TODO: free trie
+}
 
 
 /*
@@ -23,15 +33,19 @@ void put_test(trie *trie)
     assert(put(trie, "ab"));
     assert(put(trie, "abc"));
     assert(put(trie, "db"));
+    assert(trie->size == 3);
+
     assert(put(trie, "cab"));
     assert(put(trie, "abcd"));
     assert(put(trie, "abz"));
     assert(put(trie, "a"));
+    assert(trie->size == 7);
 
     assert(!put(trie, ""));
     assert(!put(trie, "."));
     assert(!put(trie, ".,m"));
     assert(!put(trie, "m./,"));
+    assert(trie->size == 7);
 
     int aidx = hash('a');
     int bidx = hash('b');
@@ -68,6 +82,8 @@ void put_test(trie *trie)
     node_test("abz", 3, l1_a->ch, l2_b->ch, l3_z->ch);
     node_test("db", 2, l1_d->ch, l2_b_1->ch);
     node_test("cab", 3, l1_c->ch, l2_a->ch, l3_b->ch);
+
+    printf("All assertions passed for put\n");
 }
 
 static void node_test(const char *word, int n_ch, ...)
@@ -109,4 +125,6 @@ void check_test(trie *trie)
     assert(!check(trie, "."));
     assert(!check(trie, ".,m"));
     assert(!check(trie, "m./,"));
+
+    printf("All assertions passed for check\n");
 }
