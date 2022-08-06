@@ -23,15 +23,15 @@ typedef struct
 
 trie *create_trie();
 
-void free_trie(trie *trie);
+void free_trie(trie *t);
 
-bool put(trie *trie, const char *word);
+bool put(trie *t, const char *word);
 
-bool delete(const trie *trie, const char *word);
+bool delete(const trie *t, const char *word);
 
-bool check(const trie *trie, const char *word);
+bool check(const trie *t, const char *word);
 
-void complete(const trie *trie, const char *word);
+void complete(const trie *t, const char *word);
 
 void print_trie(const trie *trie);
 
