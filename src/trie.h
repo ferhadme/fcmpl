@@ -3,11 +3,6 @@
 
 #include <stdbool.h>
 
-#define IS_CPTL_LTR(ch) (ch >= 65 && ch <= 90)
-#define IS_LWR_LTR(ch) (ch >= 97 && ch <= 122)
-#define IS_VALID_CHAR(ch) (IS_CPTL_LTR(ch) || IS_LWR_LTR(ch))
-#define NUMBER_OF_LETTERS 52
-
 typedef struct node
 {
     char ch;

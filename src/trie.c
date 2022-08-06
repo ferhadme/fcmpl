@@ -4,7 +4,16 @@
 #include <assert.h>
 #include "trie.h"
 
-static void traverse_trie(const node *n, char *prefix, size_t prefix_len);
+#define IS_CPTL_LTR(ch) (ch >= 65 && ch <= 90)
+#define IS_LWR_LTR(ch) (ch >= 97 && ch <= 122)
+#define IS_VALID_CHAR(ch) (IS_CPTL_LTR(ch) || IS_LWR_LTR(ch))
+#define NUMBER_OF_LETTERS 52
+#define EXPAND_PREFIX(prefix, prefix_len, ch)	\
+    prefix = realloc(prefix, prefix_len + 1);	\
+    prefix[prefix_len - 1] = ch;		\
+    prefix[prefix_len] = '\0';			\
+
+static char *traverse_trie(const node *n, char *prefix, size_t prefix_len);
 static bool validate_word(const char *word);
 static node *put_node(node *parent, const char *word);
 static bool check_node(const node *t, const char *word);
@@ -100,7 +109,7 @@ void complete(const trie *t, const char *word)
     char *prefix = malloc((sizeof(char) * prefix_len) + 1);
     strcpy(prefix, word);
 
-    traverse_trie(n, prefix, prefix_len);
+    prefix = traverse_trie(n, prefix, prefix_len);
     free(prefix);
 }
 
@@ -108,24 +117,23 @@ void print_trie(const trie *t)
 {
     size_t prefix_len = 1;
     char *prefix = malloc((sizeof(char) * prefix_len) + 1);
-    traverse_trie(t->root, prefix, prefix_len);
-    printf("---%s---\n", prefix);
+    prefix = traverse_trie(t->root, prefix, prefix_len);
+    free(prefix);
 }
 
-static void traverse_trie(const node *n, char *prefix, size_t prefix_len)
+static char *traverse_trie(const node *n, char *prefix, size_t prefix_len)
 {
     if (n == NULL) {
-	return;
+	return prefix;
     }
-    prefix = realloc(prefix, prefix_len + 1);
-    prefix[prefix_len - 1] = n->ch;
-    prefix[prefix_len] = '\0';
+    EXPAND_PREFIX(prefix, prefix_len, n->ch);
     if (n->end_of_word) {
 	printf("%s\n", prefix);
     }
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
-	traverse_trie(*(n->children + i), prefix, prefix_len + 1);
+	prefix = traverse_trie(*(n->children + i), prefix, prefix_len + 1);
     }
+    return prefix;
 }
 
 static node *get_final_node(node *n, const char *word)
