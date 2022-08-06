@@ -20,6 +20,7 @@ static bool check_node(const node *t, const char *word);
 // static bool delete_node(const node *n, const char *word);
 static node *get_final_node(node *n, const char *word);
 static node *create_node(char with);
+static void free_node(node *n);
 
 
 trie *create_trie()
@@ -41,8 +42,21 @@ trie *create_trie()
 
 void free_trie(trie *t)
 {
-    // TODO: all nodes in tree also should be freed
+    free_node(t->root);
     free(t);
+}
+
+static void free_node(node *n)
+{
+    if (n == NULL) {
+	return;
+    }
+
+    for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
+	free_node(*(n->children + i));
+    }
+    free(n->children);
+    free(n);
 }
 
 bool put(trie *t, const char *word)
