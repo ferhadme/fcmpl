@@ -22,7 +22,7 @@ void free_trie(trie *t);
 
 bool put(trie *t, const char *word);
 
-bool delete(const trie *t, const char *word);
+bool delete(trie *t, const char *word);
 
 bool check(const trie *t, const char *word);
 

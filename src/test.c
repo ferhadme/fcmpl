@@ -128,3 +128,29 @@ void check_test(trie *trie)
 
     printf("All assertions passed for check\n");
 }
+
+/*
+ * Assuming that delete_test(trie) called after put_test(trie), so there are some data in trie to test delete function
+ */
+void delete_test(trie *trie)
+{
+    unsigned int trie_size = trie->size;
+    assert(delete(trie, "ab"));
+    assert(!check(trie, "ab"));
+    trie_size--;
+    assert(trie->size == trie_size);
+
+    assert(!delete(trie, "abcde"));
+    assert(!check(trie, "abcde"));
+    assert(trie->size == trie_size);
+
+    assert(!delete(trie, "./,"));
+    assert(!check(trie, "./,"));
+    assert(trie->size == trie_size);
+
+    assert(!delete(trie, ""));
+    assert(!check(trie, ""));
+    assert(trie->size == trie_size);
+
+    printf("All assertions passed for delete\n");
+}

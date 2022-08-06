@@ -8,10 +8,15 @@
 #define IS_LWR_LTR(ch) (ch >= 97 && ch <= 122)
 #define IS_VALID_CHAR(ch) (IS_CPTL_LTR(ch) || IS_LWR_LTR(ch))
 #define NUMBER_OF_LETTERS 52
-#define EXPAND_PREFIX(prefix, prefix_len, ch)	\
-    prefix = realloc(prefix, prefix_len + 1);	\
-    prefix[prefix_len - 1] = ch;		\
-    prefix[prefix_len] = '\0';			\
+
+#define EXPAND_PREFIX(prefix, prefix_len, ch)		\
+    prefix = realloc(prefix, prefix_len + 1);		\
+    if (prefix == NULL) {				\
+	fprintf(stderr, "Memory allocation error\n");	\
+	return NULL;					\
+    }							\
+    prefix[prefix_len - 1] = ch;			\
+    prefix[prefix_len] = '\0';				\
 
 static char *traverse_trie(const node *n, char *prefix, size_t prefix_len);
 static bool validate_word(const char *word);
@@ -27,6 +32,7 @@ trie *create_trie()
 {
     trie *t = malloc(sizeof(trie));
     if (t == NULL) {
+	fprintf(stderr, "Memory allocation error\n");
 	return NULL;
     }
 
@@ -34,6 +40,10 @@ trie *create_trie()
      * character dot (.) is allocated for root of trie
      */
     node *root = create_node('.');
+    if (root == NULL) {
+	fprintf(stderr, "Memory allocation error\n");
+	return NULL;
+    }
 
     t->root = root;
     t->size = 0;
@@ -64,9 +74,9 @@ bool put(trie *t, const char *word)
     if (!validate_word(word)) {
 	return false;
     }
-    t->size++;
     int idx = hash(*word);
     *(t->root->children + idx) = put_node(*(t->root->children + idx), word);
+    t->size++;
     return true;
 }
 
@@ -74,6 +84,10 @@ static node *put_node(node *parent, const char *word)
 {
     if (parent == NULL) {
 	parent = create_node(*word);
+	if (parent == NULL) {
+	    fprintf(stderr, "Memory allocation error\n");
+	    return NULL;
+	}
     }
     int idx = hash(*(word + 1));
     if (idx == -1) {
@@ -84,11 +98,21 @@ static node *put_node(node *parent, const char *word)
     return parent;
 }
 
-// TODO Implement
-// bool delete(const trie *t, const char *word);
+bool delete(trie *t, const char *word)
+{
+    if (!validate_word(word)) {
+	return false;
+    }
 
-// TODO Implement
-// static bool delete_node(const node *n, const char *word);
+    int idx = hash(*word);
+    node *n = get_final_node(*(t->root->children + idx), word);
+    if (n == NULL) {
+	return false;
+    }
+    n->end_of_word = false;
+    t->size--;
+    return true;
+}
 
 bool check(const trie *t, const char *word)
 {
@@ -121,9 +145,17 @@ void complete(const trie *t, const char *word)
 
     size_t prefix_len = strlen(word);
     char *prefix = malloc((sizeof(char) * prefix_len) + 1);
+    if (prefix == NULL) {
+	fprintf(stderr, "Memory allocation error\n");
+	return;
+    }
     strcpy(prefix, word);
 
     prefix = traverse_trie(n, prefix, prefix_len);
+    if (prefix == NULL) {
+	fprintf(stderr, "Memory allocation error\n");
+	return;
+    }
     free(prefix);
 }
 
@@ -131,7 +163,15 @@ void print_trie(const trie *t)
 {
     size_t prefix_len = 1;
     char *prefix = malloc((sizeof(char) * prefix_len) + 1);
+    if (prefix == NULL) {
+    	fprintf(stderr, "Memory allocation error\n");
+	return;
+    }
     prefix = traverse_trie(t->root, prefix, prefix_len);
+    if (prefix == NULL) {
+	fprintf(stderr, "Memory allocation error\n");
+	return;
+    }
     free(prefix);
 }
 
@@ -188,8 +228,16 @@ static bool validate_word(const char *word)
 static node *create_node(char with)
 {
     node *n = malloc(sizeof(node));
+    if (n == NULL) {
+	fprintf(stderr, "Memory allocation error\n");
+	return NULL;
+    }
     n->ch = with;
     n->children = malloc(sizeof(node *) * NUMBER_OF_LETTERS);
+    if (n->children == NULL) {
+	fprintf(stderr, "Memory allocation error\n");
+	return NULL;
+    }
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	*(n->children + i) = NULL;
     }
