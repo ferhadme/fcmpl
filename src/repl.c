@@ -18,6 +18,12 @@
 
 #define COMMAND_STRNCMP_LEN(str) (strlen(str) + 1)
 
+static void build_trie(FILE *f, trie *t)
+{
+    (void) f;
+    (void) t;
+}
+
 bool execute(trie *t, char **tokens)
 {
     (void) t;
@@ -55,7 +61,7 @@ bool execute(trie *t, char **tokens)
 	    fprintf(stderr, "Word is not provided\n");
 	    return false;
 	}
-	// TODO: delete existing word from trie
+	delete(t, word);
     }
 
     else if (strncmp(*tokens, CHECK, COMMAND_STRNCMP_LEN(CHECK)) == 0) {
