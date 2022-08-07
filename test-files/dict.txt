@@ -3,5 +3,6 @@ application
 banana
 base
 power
+new_apple
 powerful
 feel

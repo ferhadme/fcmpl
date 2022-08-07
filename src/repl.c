@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,11 +19,7 @@
 
 #define COMMAND_STRNCMP_LEN(str) (strlen(str) + 1)
 
-static void build_trie(FILE *f, trie *t)
-{
-    (void) f;
-    (void) t;
-}
+static void build_trie(FILE *fp, trie *t);
 
 bool execute(trie *t, char **tokens)
 {
@@ -37,13 +34,13 @@ bool execute(trie *t, char **tokens)
 	    fprintf(stderr, "File name not provided\n");
 	    return false;
 	}
-	FILE *f = fopen(file_name, "r");
-	if (f == NULL) {
+	FILE *fp = fopen(file_name, "r");
+	if (fp == NULL) {
 	    fprintf(stderr, "File couldn't be opened\n");
 	    return false;
 	}
-	// TODO: load file and build trie
-	fclose(f);
+	build_trie(fp, t);
+	fclose(fp);
     }
 
     else if (strncmp(*tokens, PUT, COMMAND_STRNCMP_LEN(PUT)) == 0) {
@@ -85,8 +82,8 @@ bool execute(trie *t, char **tokens)
 	    fprintf(stderr, "Output file name not provided\n");
 	    return false;
 	}
-	FILE *f = fopen(out_name, "r");
-	if (f == NULL) {
+	FILE *fp = fopen(out_name, "r");
+	if (fp == NULL) {
 	    fprintf(stderr, "File couldn't be opened\n");
 	    return false;
 	}
@@ -167,4 +164,23 @@ char **parse_line(char *line)
     }
 
     return tokens;
+}
+
+static void build_trie(FILE *fp, trie *t)
+{
+    char * line = NULL;
+    size_t len = 0;
+
+    printf("[INFO] Started to load file\n");
+
+    while (getline(&line, &len, fp) != -1) {
+	line[strcspn(line, "\n")] = 0;
+	if (!put(t, line)) {
+	    printf("[INFO] Ignoring invalid word %s\n", line);
+	}
+    }
+
+    if (line) {
+        free(line);
+    }
 }

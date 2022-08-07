@@ -215,14 +215,16 @@ int hash(char ch)
 
 static bool validate_word(const char *word)
 {
-    const char *tmp = word;
+    if (*word == '\0') {
+	return false;
+    }
     while (*word != '\0') {
 	if (!IS_VALID_CHAR(*word)) {
 	    return false;
 	}
 	word++;
     }
-    return *tmp != *word;
+    return true;
 }
 
 static node *create_node(char with)
