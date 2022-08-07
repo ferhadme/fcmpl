@@ -46,7 +46,7 @@ bool execute(trie *t, char **tokens)
 	    fprintf(stderr, "Word is not provided\n");
 	    return false;
 	}
-	// TODO: put new word into trie
+	put(t, word);
     }
 
     else if (strncmp(*tokens, DELETE, COMMAND_STRNCMP_LEN(DELETE)) == 0) {
@@ -90,7 +90,7 @@ bool execute(trie *t, char **tokens)
 	    fprintf(stderr, "More than one word provided\n");
 	    return false;
 	}
-	// TODO: complete the word
+	complete(t, *tokens);
     }
 
     return false;
