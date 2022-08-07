@@ -64,11 +64,13 @@ bool execute(trie *t, char **tokens)
 	    fprintf(stderr, "Word is not provided\n");
 	    return false;
 	}
-	// TODO: check if word exists in trie
+	if (check(t, word)) {
+	    printf("%s\n", word);
+	}
     }
 
     else if (strncmp(*tokens, PRINT, COMMAND_STRNCMP_LEN(PRINT)) == 0) {
-	// TODO: print all words in trie
+	print_trie(t);
     }
 
     else if (strncmp(*tokens, GENERATE, COMMAND_STRNCMP_LEN(GENERATE)) == 0) {
