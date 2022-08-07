@@ -22,7 +22,6 @@ static char *traverse_trie(const node *n, char *prefix, size_t prefix_len);
 static bool validate_word(const char *word);
 static node *put_node(node *parent, const char *word);
 static bool check_node(const node *t, const char *word);
-// static bool delete_node(const node *n, const char *word);
 static node *get_final_node(node *n, const char *word);
 static node *create_node(char with);
 static void free_node(node *n);
