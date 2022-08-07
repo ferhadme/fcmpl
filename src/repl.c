@@ -16,21 +16,16 @@
 #define GENERATE ".generate"
 #define QUIT ".quit"
 
-#define COMMAND_STR_NCMP_LEN(str) (strlen(str) + 1)
+#define COMMAND_STRNCMP_LEN(str) (strlen(str) + 1)
 
 bool execute(trie *t, char **tokens)
 {
     (void) t;
-    if (tokens == NULL) {
-	fprintf(stderr, "Bad command\n");
-	return false;
-    }
-
-    if (strncmp(*tokens, QUIT, COMMAND_STR_NCMP_LEN(QUIT)) == 0) {
+    if (strncmp(*tokens, QUIT, COMMAND_STRNCMP_LEN(QUIT)) == 0) {
 	return true;
     }
 
-    if (strncmp(*tokens, LOAD, COMMAND_STR_NCMP_LEN(LOAD)) == 0) {
+    if (strncmp(*tokens, LOAD, COMMAND_STRNCMP_LEN(LOAD)) == 0) {
 	char *file_name = *(tokens + 1);
 	if (file_name == NULL) {
 	    fprintf(stderr, "File name not provided\n");
@@ -45,7 +40,7 @@ bool execute(trie *t, char **tokens)
 	fclose(f);
     }
 
-    else if (strncmp(*tokens, PUT, COMMAND_STR_NCMP_LEN(PUT)) == 0) {
+    else if (strncmp(*tokens, PUT, COMMAND_STRNCMP_LEN(PUT)) == 0) {
 	char *word = *(tokens + 1);
 	if (word == NULL) {
 	    fprintf(stderr, "Word is not provided\n");
@@ -54,7 +49,7 @@ bool execute(trie *t, char **tokens)
 	// TODO: put new word into trie
     }
 
-    else if (strncmp(*tokens, DELETE, COMMAND_STR_NCMP_LEN(DELETE)) == 0) {
+    else if (strncmp(*tokens, DELETE, COMMAND_STRNCMP_LEN(DELETE)) == 0) {
 	char *word = *(tokens + 1);
 	if (word == NULL) {
 	    fprintf(stderr, "Word is not provided\n");
@@ -63,7 +58,7 @@ bool execute(trie *t, char **tokens)
 	// TODO: delete existing word from trie
     }
 
-    else if (strncmp(*tokens, CHECK, COMMAND_STR_NCMP_LEN(CHECK)) == 0) {
+    else if (strncmp(*tokens, CHECK, COMMAND_STRNCMP_LEN(CHECK)) == 0) {
 	char *word = *(tokens + 1);
 	if (word == NULL) {
 	    fprintf(stderr, "Word is not provided\n");
@@ -72,11 +67,11 @@ bool execute(trie *t, char **tokens)
 	// TODO: check if word exists in trie
     }
 
-    else if (strncmp(*tokens, PRINT, COMMAND_STR_NCMP_LEN(PRINT)) == 0) {
+    else if (strncmp(*tokens, PRINT, COMMAND_STRNCMP_LEN(PRINT)) == 0) {
 	// TODO: print all words in trie
     }
 
-    else if (strncmp(*tokens, GENERATE, COMMAND_STR_NCMP_LEN(GENERATE)) == 0) {
+    else if (strncmp(*tokens, GENERATE, COMMAND_STRNCMP_LEN(GENERATE)) == 0) {
 	char *out_name = *(tokens + 1);
 	if (out_name == NULL) {
 	    fprintf(stderr, "Output file name not provided\n");

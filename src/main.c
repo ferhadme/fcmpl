@@ -11,6 +11,11 @@ int main(void) {
 	char *line = get_line();
 	char **tokens = parse_line(line);
 
+	if (tokens == NULL) {
+	    fprintf(stderr, "Bad command\n");
+	    continue;
+	}
+
 	status = execute(t, tokens);
 
 	FREE_INPUT(tokens, line);
