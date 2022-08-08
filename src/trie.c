@@ -202,7 +202,7 @@ static node *get_final_node(node *n, const char *word)
     return get_final_node(*(n->children + idx), word + 1);
 }
 
-void generate_graph_svg(FILE *fp, const trie *t)
+void generate_dot_file(FILE *fp, const trie *t)
 {
     fprintf(fp, "digraph {\n");
 

@@ -30,7 +30,7 @@ void complete(const trie *t, const char *word);
 
 void print_trie(const trie *t);
 
-void generate_graph_svg(FILE *fp, const trie *t);
+void generate_dot_file(FILE *fp, const trie *t);
 
 int hash(char ch);
 

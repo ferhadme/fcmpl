@@ -18,6 +18,7 @@
 #define GENERATE ".generate"
 #define QUIT ".quit"
 
+#define DOT_LAYOUT_ENGINE "dot"
 #define DOT_GRAPH_FORMAT_FLAG "-Tsvg"
 #define FILE_EXTENSION_LEN 5
 
@@ -28,6 +29,7 @@
 
 
 static void build_trie(FILE *fp, trie *t);
+static void generate_svg_from_dot(char **args);
 
 bool execute(trie *t, char **tokens)
 {
@@ -99,19 +101,17 @@ bool execute(trie *t, char **tokens)
 	    fprintf(stderr, "File couldn't be opened\n");
 	    return false;
 	}
-	generate_graph_svg(dot_fp, t);
+	generate_dot_file(dot_fp, t);
 	fclose(dot_fp);
 
 	char graph_out[strlen(out_name) + 5];
 	GENERATE_FILE_NAME(graph_out, out_name, ".svg");
 
-	printf("%s %s %s\n", DOT_GRAPH_FORMAT_FLAG, dot_name, graph_out);
-	int status = execl("dot", DOT_GRAPH_FORMAT_FLAG, dot_name, "-o", graph_out, NULL);
-	printf("%i\n", status);
-	if (status) {
-	    fprintf(stderr, "Graph file couldn't be generated\n");
-	    return false;
-	}
+	char *args[] = {
+	    DOT_LAYOUT_ENGINE, DOT_GRAPH_FORMAT_FLAG, dot_name, "-o", graph_out, NULL
+	};
+
+	generate_svg_from_dot(args);
     }
 
     else {
@@ -188,6 +188,14 @@ char **parse_line(char *line)
     }
 
     return tokens;
+}
+
+static void generate_svg_from_dot(char **args)
+{
+    if (fork() == 0) {
+	execvp("dot", args);
+	printf("Unknown args\n");
+    }
 }
 
 static void build_trie(FILE *fp, trie *t)
