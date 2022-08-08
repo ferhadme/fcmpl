@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include "repl.h"
 
 #define BUFFER_SIZE 256
@@ -17,7 +18,14 @@
 #define GENERATE ".generate"
 #define QUIT ".quit"
 
+#define DOT_GRAPH_FORMAT_FLAG "-Tsvg"
+#define FILE_EXTENSION_LEN 5
+
 #define COMMAND_STRNCMP_LEN(str) (strlen(str) + 1)
+#define GENERATE_FILE_NAME(target, src, ext)	\
+    strcpy(target, src);			\
+    strcpy(target + strlen(src), ext);		\
+
 
 static void build_trie(FILE *fp, trie *t);
 
@@ -82,12 +90,28 @@ bool execute(trie *t, char **tokens)
 	    fprintf(stderr, "Output file name not provided\n");
 	    return false;
 	}
-	FILE *fp = fopen(out_name, "r");
-	if (fp == NULL) {
+
+	char dot_name[strlen(out_name) + FILE_EXTENSION_LEN];
+	GENERATE_FILE_NAME(dot_name, out_name, ".dot");
+
+	FILE *dot_fp = fopen(dot_name, "w");
+	if (dot_fp == NULL) {
 	    fprintf(stderr, "File couldn't be opened\n");
 	    return false;
 	}
-	// TODO: generate graphical image from trie
+	generate_graph_svg(dot_fp, t);
+	fclose(dot_fp);
+
+	char graph_out[strlen(out_name) + 5];
+	GENERATE_FILE_NAME(graph_out, out_name, ".svg");
+
+	printf("%s %s %s\n", DOT_GRAPH_FORMAT_FLAG, dot_name, graph_out);
+	int status = execl("dot", DOT_GRAPH_FORMAT_FLAG, dot_name, "-o", graph_out, NULL);
+	printf("%i\n", status);
+	if (status) {
+	    fprintf(stderr, "Graph file couldn't be generated\n");
+	    return false;
+	}
     }
 
     else {

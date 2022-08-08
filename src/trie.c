@@ -25,6 +25,7 @@ static bool check_node(const node *t, const char *word);
 static node *get_final_node(node *n, const char *word);
 static node *create_node(char with);
 static void free_node(node *n);
+static void dot_node(FILE *fp, const node *n);
 
 
 trie *create_trie()
@@ -199,6 +200,30 @@ static node *get_final_node(node *n, const char *word)
 	return n;
     }
     return get_final_node(*(n->children + idx), word + 1);
+}
+
+void generate_graph_svg(FILE *fp, const trie *t)
+{
+    fprintf(fp, "digraph {\n");
+
+    node *root = t->root;
+    fprintf(fp, "  \"%p\" [label=\"%c\";color=%s]\n", (void *) root, root->ch, "red");
+    dot_node(fp, root);
+
+    fprintf(fp, "}\n");
+}
+
+static void dot_node(FILE *fp, const node *n)
+{
+    for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
+	node *child = *(n->children + i);
+	if (*(n->children + i) != NULL) {
+	    fprintf(fp, "  \"%p\" [label=\"%c\";color=%s]\n", (void *) child, child->ch,
+		    child->end_of_word ? "green" : "black");
+	    fprintf(fp, "  \"%p\" -> \"%p\"\n", (void *) n, (void *) child);
+	    dot_node(fp, child);
+	}
+    }
 }
 
 int hash(char ch)

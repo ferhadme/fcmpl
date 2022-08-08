@@ -28,7 +28,9 @@ bool check(const trie *t, const char *word);
 
 void complete(const trie *t, const char *word);
 
-void print_trie(const trie *trie);
+void print_trie(const trie *t);
+
+void generate_graph_svg(FILE *fp, const trie *t);
 
 int hash(char ch);
 
