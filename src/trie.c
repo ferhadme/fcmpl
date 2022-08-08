@@ -207,7 +207,8 @@ void generate_dot_file(FILE *fp, const trie *t)
     fprintf(fp, "digraph {\n");
 
     node *root = t->root;
-    fprintf(fp, "  \"%p\" [label=\"%c\";color=%s]\n", (void *) root, root->ch, "red");
+    fprintf(fp, "  \"%p\" [label=\"%c\";fillcolor=%s;style=filled;fontcolor=white]\n",
+	    (void *) root, root->ch, "red");
     dot_node(fp, root);
 
     fprintf(fp, "}\n");
@@ -218,7 +219,8 @@ static void dot_node(FILE *fp, const node *n)
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	node *child = *(n->children + i);
 	if (*(n->children + i) != NULL) {
-	    fprintf(fp, "  \"%p\" [label=\"%c\";color=%s]\n", (void *) child, child->ch,
+	    fprintf(fp, "  \"%p\" [label=\"%c\";fillcolor=%s;style=filled;fontcolor=white]\n",
+		    (void *) child, child->ch,
 		    child->end_of_word ? "green" : "black");
 	    fprintf(fp, "  \"%p\" -> \"%p\"\n", (void *) n, (void *) child);
 	    dot_node(fp, child);
