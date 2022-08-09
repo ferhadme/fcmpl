@@ -23,5 +23,6 @@ int main(void) {
 
     free_trie(t);
 
+    printf("Have a good day!\n");
     return 0;
 }
