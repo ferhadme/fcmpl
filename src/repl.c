@@ -33,7 +33,6 @@ static void generate_svg_from_dot(char **args);
 
 bool execute(trie *t, char **tokens)
 {
-    (void) t;
     if (strncmp(*tokens, QUIT, COMMAND_STRNCMP_LEN(QUIT)) == 0) {
 	return true;
     }

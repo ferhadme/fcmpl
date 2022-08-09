@@ -7,15 +7,14 @@
 
 static void node_test(const char *word, int n_ch, ...);
 
-void test_all()
-{
+int main(void) {
     trie *trie = create_trie();
     put_test(trie);
     check_test(trie);
     printf("All tests are passed\n");
-    // TODO: free trie
+    free_trie(trie);
+    return 0;
 }
-
 
 /*
     .
