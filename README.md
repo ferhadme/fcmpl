@@ -67,3 +67,5 @@ After **.generate** operation, two files are generated
 x.dot is dot file (the dot language **Graphviz** uses for generating graphs in different formats) that generated from trie
 
 x.svg is svg file generated from x.dot by using **Graphviz**
+
+![Svg generated from dictionary](test-files/dict.svg)
