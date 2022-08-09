@@ -68,4 +68,4 @@ x.dot is dot file (the dot language **Graphviz** uses for generating graphs in d
 
 x.svg is svg file generated from x.dot by using **Graphviz**
 
-![Svg generated from dictionary](test-files/dict.svg)
+![Svg generated from dictionary](test-files/generated.svg)
