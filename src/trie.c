@@ -91,7 +91,7 @@ static node *put_node(node *parent, const char *word)
     }
     int idx = hash(*(word + 1));
     if (idx == -1) {
-	parent->end_of_word = true;
+	parent->eow = true;
     } else {
 	*(parent->children + idx) = put_node(*(parent->children + idx), word + 1);
     }
@@ -109,7 +109,7 @@ bool delete(trie *t, const char *word)
     if (n == NULL) {
 	return false;
     }
-    n->end_of_word = false;
+    n->eow = false;
     t->size--;
     return true;
 }
@@ -130,7 +130,7 @@ static bool check_node(const node *n, const char *word)
     }
     int idx = hash(*(word + 1));
     if (idx == -1 && n != NULL) {
-	return n->end_of_word;
+	return n->eow;
     }
     return check_node(*(n->children + idx), word + 1);
 }
@@ -181,7 +181,7 @@ static char *traverse_trie(const node *n, char *prefix, size_t prefix_len)
 	return prefix;
     }
     EXPAND_PREFIX(prefix, prefix_len, n->ch);
-    if (n->end_of_word) {
+    if (n->eow) {
 	printf("%s\n", prefix);
     }
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
@@ -221,7 +221,7 @@ static void dot_node(FILE *fp, const node *n)
 	if (*(n->children + i) != NULL) {
 	    fprintf(fp, "  \"%p\" [label=\"%c\";fillcolor=%s;style=filled;fontcolor=white]\n",
 		    (void *) child, child->ch,
-		    child->end_of_word ? "green" : "black");
+		    child->eow ? "green" : "black");
 	    fprintf(fp, "  \"%p\" -> \"%p\"\n", (void *) n, (void *) child);
 	    dot_node(fp, child);
 	}
@@ -261,14 +261,11 @@ static node *create_node(char with)
 	return NULL;
     }
     n->ch = with;
-    n->children = malloc(sizeof(node *) * NUMBER_OF_LETTERS);
+    n->children = calloc(NUMBER_OF_LETTERS, sizeof(node *));
     if (n->children == NULL) {
 	fprintf(stderr, "Memory allocation error\n");
 	return NULL;
     }
-    for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
-	*(n->children + i) = NULL;
-    }
-    n->end_of_word = false;
+    n->eow = false;
     return n;
 }
