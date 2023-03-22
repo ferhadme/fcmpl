@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#define DELETE_THRESHOLD 50
+
 typedef struct node
 {
     char ch;
@@ -14,6 +16,7 @@ typedef struct
 {
     node *root;
     unsigned int size;
+    unsigned int delete_threshold;
 } trie;
 
 trie *create_trie();

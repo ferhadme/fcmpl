@@ -26,6 +26,7 @@ static node *get_final_node(node *n, const char *word);
 static node *create_node(char with);
 static void free_node(node *n);
 static void dot_node(FILE *fp, const node *n);
+static void rebuild_trie_if_threshold_passed(trie *t);
 
 
 trie *create_trie()
@@ -111,7 +112,18 @@ bool delete(trie *t, const char *word)
     }
     n->eow = false;
     t->size--;
+    t->delete_threshold++;
+    rebuild_trie_if_threshold_passed(t);
     return true;
+}
+
+static void rebuild_trie_if_threshold_passed(trie *t)
+{
+    if (t->delete_threshold < DELETE_THRESHOLD) return;
+
+    // TODO: Clean all orphan nodes
+
+    t->delete_threshold = 0;
 }
 
 bool check(const trie *t, const char *word)
