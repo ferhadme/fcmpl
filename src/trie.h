@@ -3,7 +3,13 @@
 
 #include <stdbool.h>
 
+#define DEBUG 1
+
+#ifdef DEBUG
+#define DELETE_THRESHOLD 1
+#else
 #define DELETE_THRESHOLD 50
+#endif
 
 typedef struct node
 {

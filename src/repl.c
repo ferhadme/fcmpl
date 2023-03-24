@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include "repl.h"
+#include "graphviz_cfg.h"
 
 #define BUFFER_SIZE 256
 #define COMMAND_DELIM " "
@@ -18,14 +19,10 @@
 #define GENERATE ".generate"
 #define QUIT ".quit"
 
-#define DOT_LAYOUT_ENGINE "dot"
-#define DOT_GRAPH_FORMAT_FLAG "-Tsvg"
-#define FILE_EXTENSION_LEN 5
-
 #define COMMAND_STRNCMP_LEN(str) (strlen(str) + 1)
 #define GENERATE_FILE_NAME(target, src, ext)	\
     strcpy(target, src);			\
-    strcpy(target + strlen(src), ext);		\
+    strcpy((target) + strlen(src), ext);	\
 
 
 static void build_trie(FILE *fp, trie *t);
@@ -103,7 +100,7 @@ bool execute(trie *t, char **tokens)
 	generate_dot_file(dot_fp, t);
 	fclose(dot_fp);
 
-	char graph_out[strlen(out_name) + 5];
+	char graph_out[strlen(out_name) + FILE_EXTENSION_LEN];
 	GENERATE_FILE_NAME(graph_out, out_name, ".svg");
 
 	char *args[] = {

@@ -4,6 +4,11 @@
 
 int main(void) {
     trie *t = create_trie();
+    if (t == NULL) {
+	fprintf(stderr, "REPL couldn't be initialized\n");
+	exit(1);
+    }
+
     bool status = false;
 
     do {

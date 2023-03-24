@@ -3,19 +3,20 @@
 #include <string.h>
 #include <assert.h>
 #include "trie.h"
+#include "graphviz_cfg.h"
 
-#define IS_CPTL_LTR(ch) (ch >= 65 && ch <= 90)
-#define IS_LWR_LTR(ch) (ch >= 97 && ch <= 122)
+#define IS_CPTL_LTR(ch) ((ch) >= 65 && (ch) <= 90)
+#define IS_LWR_LTR(ch) ((ch) >= 97 && (ch) <= 122)
 #define IS_VALID_CHAR(ch) (IS_CPTL_LTR(ch) || IS_LWR_LTR(ch))
 #define NUMBER_OF_LETTERS 52
 
 #define EXPAND_PREFIX(prefix, prefix_len, ch)		\
-    prefix = realloc(prefix, prefix_len + 1);		\
+    prefix = realloc(prefix, (prefix_len) + 1);		\
     if (prefix == NULL) {				\
 	fprintf(stderr, "Memory allocation error\n");	\
 	return NULL;					\
     }							\
-    prefix[prefix_len - 1] = ch;			\
+    prefix[(prefix_len) - 1] = ch;			\
     prefix[prefix_len] = '\0';				\
 
 static char *traverse_trie(const node *n, char *prefix, size_t prefix_len);
@@ -27,6 +28,7 @@ static node *create_node(char with);
 static void free_node(node *n);
 static void dot_node(FILE *fp, const node *n);
 static void rebuild_trie_if_threshold_passed(trie *t);
+static bool clean_orphan_nodes(node *n);
 
 
 trie *create_trie()
@@ -117,13 +119,49 @@ bool delete(trie *t, const char *word)
     return true;
 }
 
+// FIXME
 static void rebuild_trie_if_threshold_passed(trie *t)
 {
     if (t->delete_threshold < DELETE_THRESHOLD) return;
 
-    // TODO: Clean all orphan nodes
+    printf("INFO: rebuilding the trie...\n");
+    node *root = t->root;
+    for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
+	node *child = *(root->children + i);
+
+	bool leaf = clean_orphan_nodes(child);
+	if (!leaf) {
+	    *(root->children + i) = NULL;
+	}
+    }
 
     t->delete_threshold = 0;
+}
+
+// FIXME
+static bool clean_orphan_nodes(node *n)
+{
+    printf("INFO: cleaning orphan nodes...\n");
+    if (n == NULL) {
+	return false;
+    }
+
+    for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
+	node *child = *(n->children + i);
+
+	bool leaf = clean_orphan_nodes(child);
+	if (leaf) return true;
+    }
+
+    bool eow = n->eow;
+    if (!eow) {
+	printf("INFO: %c cleaned\n", n->ch);
+	free_node(n);
+    }
+
+    printf("INFO: end of clean_orphan_nodes\n");
+
+    return eow;
 }
 
 bool check(const trie *t, const char *word)
@@ -219,8 +257,8 @@ void generate_dot_file(FILE *fp, const trie *t)
     fprintf(fp, "digraph {\n");
 
     node *root = t->root;
-    fprintf(fp, "  \"%p\" [label=\"%c\";fillcolor=%s;style=filled;fontcolor=white]\n",
-	    (void *) root, root->ch, "red");
+    fprintf(fp, DOT_FILE_ROOT_NODE_FORMAT,
+	    (void *) root, root->ch, ROOT_NODE_COLOR);
     dot_node(fp, root);
 
     fprintf(fp, "}\n");
@@ -231,9 +269,9 @@ static void dot_node(FILE *fp, const node *n)
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	node *child = *(n->children + i);
 	if (*(n->children + i) != NULL) {
-	    fprintf(fp, "  \"%p\" [label=\"%c\";fillcolor=%s;style=filled;fontcolor=white]\n",
+	    fprintf(fp, DOT_FILE_CHILD_NODE_FORMAT,
 		    (void *) child, child->ch,
-		    child->eow ? "green" : "black");
+		    child->eow ? EOW_CHILD_NODE_COLOR : CHILD_NODE_COLOR);
 	    fprintf(fp, "  \"%p\" -> \"%p\"\n", (void *) n, (void *) child);
 	    dot_node(fp, child);
 	}
