@@ -8,7 +8,20 @@
 #define IS_CPTL_LTR(ch) ((ch) >= 65 && (ch) <= 90)
 #define IS_LWR_LTR(ch) ((ch) >= 97 && (ch) <= 122)
 #define IS_VALID_CHAR(ch) (IS_CPTL_LTR(ch) || IS_LWR_LTR(ch))
+
 #define NUMBER_OF_LETTERS 52
+
+/*
+ * character dot (.) is allocated for root of trie
+ */
+#define ROOT_CHAR '.'
+
+/*
+ * enum for separating different types of nodes in deletion process (eow node, leaf node, orphan node)
+ */
+typedef enum {
+    EOW_NODE, LEAF_NODE, ORPHAN_NODE
+} node_type;
 
 #define EXPAND_PREFIX(prefix, prefix_len, ch)		\
     prefix = realloc(prefix, (prefix_len) + 1);		\
@@ -28,7 +41,8 @@ static node *create_node(char with);
 static void free_node(node *n);
 static void dot_node(FILE *fp, const node *n);
 static void rebuild_trie_if_threshold_passed(trie *t);
-static bool clean_orphan_nodes(node *n);
+static node_type clean_orphan_nodes(node *n);
+static void free_orphan_node(node *n);
 
 
 trie *create_trie()
@@ -39,10 +53,7 @@ trie *create_trie()
 	return NULL;
     }
 
-    /*
-     * character dot (.) is allocated for root of trie
-     */
-    node *root = create_node('.');
+    node *root = create_node(ROOT_CHAR);
     if (root == NULL) {
 	fprintf(stderr, "Memory allocation error\n");
 	return NULL;
@@ -68,6 +79,7 @@ static void free_node(node *n)
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	free_node(*(n->children + i));
     }
+
     free(n->children);
     free(n);
 }
@@ -129,8 +141,8 @@ static void rebuild_trie_if_threshold_passed(trie *t)
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	node *child = *(root->children + i);
 
-	bool leaf = clean_orphan_nodes(child);
-	if (!leaf) {
+	node_type type = clean_orphan_nodes(child);
+	if (type == ORPHAN_NODE) {
 	    *(root->children + i) = NULL;
 	}
     }
@@ -138,30 +150,43 @@ static void rebuild_trie_if_threshold_passed(trie *t)
     t->delete_threshold = 0;
 }
 
-// FIXME
-static bool clean_orphan_nodes(node *n)
+#if 0
+static void debug_node(const node *n)
 {
-    printf("INFO: cleaning orphan nodes...\n");
+    printf("Node { ch = %c, eow = %i }\n", n->ch, n->eow);
+}
+#endif
+
+// FIXME
+static node_type clean_orphan_nodes(node *n)
+{
     if (n == NULL) {
-	return false;
+	return LEAF_NODE;
     }
 
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	node *child = *(n->children + i);
 
-	bool leaf = clean_orphan_nodes(child);
-	if (leaf) return true;
+	node_type type = clean_orphan_nodes(child);
+	if (type == EOW_NODE) {
+	    return EOW_NODE;
+	} else if (type == ORPHAN_NODE) {
+	    *(n->children + i) = NULL;
+	}
     }
 
-    bool eow = n->eow;
-    if (!eow) {
-	printf("INFO: %c cleaned\n", n->ch);
-	free_node(n);
+    if (!n->eow) {
+	printf("FREE %c\n", n->ch);
+	free_orphan_node(n);
+	return ORPHAN_NODE;
     }
+    return EOW_NODE;
+}
 
-    printf("INFO: end of clean_orphan_nodes\n");
-
-    return eow;
+static void free_orphan_node(node *n)
+{
+    free(n->children);
+    free(n);
 }
 
 bool check(const trie *t, const char *word)
@@ -268,7 +293,7 @@ static void dot_node(FILE *fp, const node *n)
 {
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	node *child = *(n->children + i);
-	if (*(n->children + i) != NULL) {
+	if (child != NULL) {
 	    fprintf(fp, DOT_FILE_CHILD_NODE_FORMAT,
 		    (void *) child, child->ch,
 		    child->eow ? EOW_CHILD_NODE_COLOR : CHILD_NODE_COLOR);
