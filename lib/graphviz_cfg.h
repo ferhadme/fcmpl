@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023, Farhad Mehdizada
+ */
+
 #ifndef GRAPHVIZ_CFG_H
 #define GRAPHVIZ_CFG_H
 

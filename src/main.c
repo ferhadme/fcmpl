@@ -1,6 +1,10 @@
+/*
+ * Copyright (c) 2023, Farhad Mehdizada
+ */
+
 #include <stdio.h>
-#include "repl.h"
 #include "trie.h"
+#include "repl.h"
 
 int main(void) {
     trie *t = create_trie();
