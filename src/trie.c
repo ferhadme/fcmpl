@@ -16,13 +16,6 @@
  */
 #define ROOT_CHAR '.'
 
-/*
- * enum for separating different types of nodes in deletion process (eow node, leaf node, orphan node)
- */
-typedef enum {
-    EOW_NODE, LEAF_NODE, ORPHAN_NODE
-} node_type;
-
 #define EXPAND_PREFIX(prefix, prefix_len, ch)		\
     prefix = realloc(prefix, (prefix_len) + 1);		\
     if (prefix == NULL) {				\
@@ -31,6 +24,13 @@ typedef enum {
     }							\
     prefix[(prefix_len) - 1] = ch;			\
     prefix[prefix_len] = '\0';				\
+
+/*
+ * enum for separating different types of nodes in deletion process (eow node, leaf node, orphan node)
+ */
+enum NODE_TYPE {
+    EOW_NODE, LEAF_NODE, ORPHAN_NODE
+};
 
 static char *traverse_trie(const node *n, char *prefix, size_t prefix_len);
 static bool validate_word(const char *word);
@@ -41,9 +41,8 @@ static node *create_node(char with);
 static void free_node(node *n);
 static void dot_node(FILE *fp, const node *n);
 static void rebuild_trie_if_threshold_passed(trie *t);
-static node_type clean_orphan_nodes(node *n);
+static enum NODE_TYPE clean_orphan_nodes(node *n);
 static void free_orphan_node(node *n);
-
 
 trie *create_trie()
 {
@@ -131,7 +130,6 @@ bool delete(trie *t, const char *word)
     return true;
 }
 
-// FIXME
 static void rebuild_trie_if_threshold_passed(trie *t)
 {
     if (t->delete_threshold < DELETE_THRESHOLD) return;
@@ -141,7 +139,7 @@ static void rebuild_trie_if_threshold_passed(trie *t)
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	node *child = *(root->children + i);
 
-	node_type type = clean_orphan_nodes(child);
+	enum NODE_TYPE type = clean_orphan_nodes(child);
 	if (type == ORPHAN_NODE) {
 	    *(root->children + i) = NULL;
 	}
@@ -150,37 +148,41 @@ static void rebuild_trie_if_threshold_passed(trie *t)
     t->delete_threshold = 0;
 }
 
-#if 0
+#if DEBUG
 static void debug_node(const node *n)
 {
     printf("Node { ch = %c, eow = %i }\n", n->ch, n->eow);
 }
 #endif
 
-// FIXME
-static node_type clean_orphan_nodes(node *n)
+static enum NODE_TYPE clean_orphan_nodes(node *n)
 {
     if (n == NULL) {
 	return LEAF_NODE;
     }
 
+    bool reduntant = true;
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	node *child = *(n->children + i);
 
-	node_type type = clean_orphan_nodes(child);
-	if (type == EOW_NODE) {
-	    return EOW_NODE;
-	} else if (type == ORPHAN_NODE) {
+	enum NODE_TYPE type = clean_orphan_nodes(child);
+
+	if (type == ORPHAN_NODE) {
 	    *(n->children + i) = NULL;
+	}
+
+	if (type == EOW_NODE) {
+	    reduntant = false;
 	}
     }
 
-    if (!n->eow) {
-	printf("FREE %c\n", n->ch);
+    if (!n->eow && reduntant) {
 	free_orphan_node(n);
-	return ORPHAN_NODE;
+    } else {
+	reduntant = false;
     }
-    return EOW_NODE;
+
+    return reduntant ? ORPHAN_NODE : EOW_NODE;
 }
 
 static void free_orphan_node(node *n)
