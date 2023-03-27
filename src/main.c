@@ -9,7 +9,7 @@ int main(void) {
 	return 1;
     }
 
-    bool status = false;
+    bool termination = false;
 
     do {
 	printf("%s", COMMAND_PROMPT);
@@ -21,10 +21,10 @@ int main(void) {
 	    continue;
 	}
 
-	status = execute(t, tokens);
+	termination = execute(t, tokens);
 
 	FREE_INPUT(tokens, line);
-    } while (!status);
+    } while (!termination);
 
     free_trie(t);
 

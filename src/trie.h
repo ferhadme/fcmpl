@@ -3,8 +3,6 @@
 
 #include <stdbool.h>
 
-#define DEBUG 1
-
 #ifdef DEBUG
 #define DELETE_THRESHOLD 1
 #else
@@ -37,9 +35,15 @@ bool check(const trie *t, const char *word);
 
 void complete(const trie *t, const char *word);
 
+#ifdef DEBUG
 void print_trie(const trie *t);
+#endif
+
+void generate_txt_file(FILE *fp, const trie *t);
 
 void generate_dot_file(FILE *fp, const trie *t);
+
+void visualize_trie(FILE *dot_fp, char *dot_out_name, char *svg_out_name, const trie *t);
 
 int hash(char ch);
 

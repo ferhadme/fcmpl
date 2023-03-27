@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <unistd.h>
 #include "trie.h"
 #include "graphviz_cfg.h"
 
@@ -9,13 +10,19 @@
 #define IS_LWR_LTR(ch) ((ch) >= 97 && (ch) <= 122)
 #define IS_VALID_CHAR(ch) (IS_CPTL_LTR(ch) || IS_LWR_LTR(ch))
 
+/*
+ * [A-Za-z]
+ */
 #define NUMBER_OF_LETTERS 52
 
 /*
- * character dot (.) is allocated for root of trie
+ * Character dot (.) is allocated for root of trie
  */
 #define ROOT_CHAR '.'
 
+/*
+ * Expands prefix by 1 letter in each step of trie traverse
+ */
 #define EXPAND_PREFIX(prefix, prefix_len, ch)		\
     prefix = realloc(prefix, (prefix_len) + 1);		\
     if (prefix == NULL) {				\
@@ -26,13 +33,13 @@
     prefix[prefix_len] = '\0';				\
 
 /*
- * enum for separating different types of nodes in deletion process (eow node, leaf node, orphan node)
+ * Enum for separating different types of nodes in deletion process (eow node, leaf node, orphan node)
  */
 enum NODE_TYPE {
     EOW_NODE, LEAF_NODE, ORPHAN_NODE
 };
 
-static char *traverse_trie(const node *n, char *prefix, size_t prefix_len);
+static char *traverse_trie(const node *n, char *prefix, size_t prefix_len, FILE *out);
 static bool validate_word(const char *word);
 static node *put_node(node *parent, const char *word);
 static bool check_node(const node *t, const char *word);
@@ -43,6 +50,7 @@ static void dot_node(FILE *fp, const node *n);
 static void rebuild_trie_if_threshold_passed(trie *t);
 static enum NODE_TYPE clean_orphan_nodes(node *n);
 static void free_orphan_node(node *n);
+static void generate_svg_from_dot(char **args);
 
 trie *create_trie()
 {
@@ -130,6 +138,9 @@ bool delete(trie *t, const char *word)
     return true;
 }
 
+/*
+ * Rebalances trie if number of deletions reaches DELETE_THRESHOLD
+ */
 static void rebuild_trie_if_threshold_passed(trie *t)
 {
     if (t->delete_threshold < DELETE_THRESHOLD) return;
@@ -228,7 +239,7 @@ void complete(const trie *t, const char *word)
     }
     strcpy(prefix, word);
 
-    prefix = traverse_trie(n, prefix, prefix_len);
+    prefix = traverse_trie(n, prefix, prefix_len, stdout);
     if (prefix == NULL) {
 	fprintf(stderr, "Memory allocation error\n");
 	return;
@@ -236,33 +247,59 @@ void complete(const trie *t, const char *word)
     free(prefix);
 }
 
+#ifdef DEBUG
 void print_trie(const trie *t)
 {
     size_t prefix_len = 1;
+
     char *prefix = malloc((sizeof(char) * prefix_len) + 1);
     if (prefix == NULL) {
     	fprintf(stderr, "Memory allocation error\n");
 	return;
     }
-    prefix = traverse_trie(t->root, prefix, prefix_len);
+
+    prefix = traverse_trie(t->root, prefix, prefix_len, stdout);
     if (prefix == NULL) {
 	fprintf(stderr, "Memory allocation error\n");
 	return;
     }
     free(prefix);
 }
+#endif
 
-static char *traverse_trie(const node *n, char *prefix, size_t prefix_len)
+void generate_txt_file(FILE *fp, const trie *t)
+{
+    node *root = t->root;
+    for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
+	node *child = *(root->children + i);
+
+	size_t prefix_len = 1;
+	char *prefix = malloc((sizeof(char) * prefix_len) + 1);
+	if (prefix == NULL) {
+	    fprintf(stderr, "Memory allocation error\n");
+	    return;
+	}
+
+	prefix = traverse_trie(child, prefix, prefix_len, fp);
+	if (prefix == NULL) {
+	    fprintf(stderr, "Memory allocation error\n");
+	    return;
+	}
+	free(prefix);
+    }
+}
+
+static char *traverse_trie(const node *n, char *prefix, size_t prefix_len, FILE *out)
 {
     if (n == NULL) {
 	return prefix;
     }
     EXPAND_PREFIX(prefix, prefix_len, n->ch);
     if (n->eow) {
-	printf("%s\n", prefix);
+	fprintf(out, "%s\n", prefix);
     }
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
-	prefix = traverse_trie(*(n->children + i), prefix, prefix_len + 1);
+	prefix = traverse_trie(*(n->children + i), prefix, prefix_len + 1, out);
     }
     return prefix;
 }
@@ -277,6 +314,17 @@ static node *get_final_node(node *n, const char *word)
 	return n;
     }
     return get_final_node(*(n->children + idx), word + 1);
+}
+
+void visualize_trie(FILE *dot_fp, char *dot_out_name, char *svg_out_name, const trie *t)
+{
+    generate_dot_file(dot_fp, t);
+
+    char *args[] = {
+	DOT_LAYOUT_ENGINE, DOT_GRAPH_FORMAT_FLAG, dot_out_name, "-o", svg_out_name, NULL
+    };
+
+    generate_svg_from_dot(args);
 }
 
 void generate_dot_file(FILE *fp, const trie *t)
@@ -302,6 +350,14 @@ static void dot_node(FILE *fp, const node *n)
 	    fprintf(fp, "  \"%p\" -> \"%p\"\n", (void *) n, (void *) child);
 	    dot_node(fp, child);
 	}
+    }
+}
+
+static void generate_svg_from_dot(char **args)
+{
+    if (fork() == 0) {
+	execvp("dot", args);
+	fprintf(stderr, "Unknown args\n");
     }
 }
 

@@ -39,10 +39,14 @@ enum REPL_COMMAND {
     COMPLETION
 };
 
-static bool repl_add(trie *t, const char **tokens);
-static bool repl_delete();
+static bool repl_add(trie *t, char **tokens);
+static bool repl_delete(trie *t, char **tokens);
+static bool repl_check(trie *t, char **tokens);
+static bool repl_load(trie *t, char **tokens);
+static bool repl_visualize(trie *t, char **tokens);
+static bool repl_generate(trie *t, char **tokens);
+static bool repl_complete(trie *t, char **tokens);
 static void build_trie(FILE *fp, trie *t);
-static void generate_svg_from_dot(char **args);
 static enum REPL_COMMAND get_command(const char *token);
 
 bool execute(trie *t, char **tokens)
@@ -51,89 +55,26 @@ bool execute(trie *t, char **tokens)
 
     switch (command) {
     case ADD:
-	
+	return repl_add(t, tokens);
     case DELETE:
-	char *word = *(tokens + 1);
-	if (word == NULL) {
-	    fprintf(stderr, "Word is not provided\n");
-	    return false;
-	}
-	delete(t, word);
-	return false;
-
+	return repl_delete(t, tokens);
     case CHECK:
-	char *word = *(tokens + 1);
-	if (word == NULL) {
-	    fprintf(stderr, "Word is not provided\n");
-	    return false;
-	}
-	if (check(t, word)) {
-	    printf("%s\n", word);
-	}
-	return false;
-
+	return repl_check(t, tokens);
     case LOAD:
-	char *file_name = *(tokens + 1);
-	if (file_name == NULL) {
-	    fprintf(stderr, "File name not provided\n");
-	    return false;
-	}
-	FILE *fp = fopen(file_name, "r");
-	if (fp == NULL) {
-	    fprintf(stderr, "File couldn't be opened\n");
-	    return false;
-	}
-	build_trie(fp, t);
-	fclose(fp);
-	return false;
-
+	return repl_load(t, tokens);
     case VISUALIZE:
-	char *out_name = *(tokens + 1);
-	if (out_name == NULL) {
-	    fprintf(stderr, "Output file name not provided\n");
-	    return false;
-	}
-
-	char dot_name[strlen(out_name) + FILE_EXTENSION_LEN];
-	GENERATE_FILE_NAME(dot_name, out_name, ".dot");
-
-	FILE *dot_fp = fopen(dot_name, "w");
-	if (dot_fp == NULL) {
-	    fprintf(stderr, "File couldn't be opened\n");
-	    return false;
-	}
-	generate_dot_file(dot_fp, t);
-	fclose(dot_fp);
-
-	char graph_out[strlen(out_name) + FILE_EXTENSION_LEN];
-	GENERATE_FILE_NAME(graph_out, out_name, ".svg");
-
-	char *args[] = {
-	    DOT_LAYOUT_ENGINE, DOT_GRAPH_FORMAT_FLAG, dot_name, "-o", graph_out, NULL
-	};
-
-	generate_svg_from_dot(args);
-	return false;
-
+	return repl_visualize(t, tokens);
     case GENERATE:
-	break;
-
+	return repl_generate(t, tokens);
 #ifdef DEBUG
     case PRINT:
 	print_trie(t);
 	return false;
 #endif
-
     case QUIT:
 	return true;
-
     default:
-	if (*(tokens + 1) != NULL) {
-	    fprintf(stderr, "More than one word provided\n");
-	    return false;
-	}
-	complete(t, *tokens);
-	return false;
+	return repl_complete(t, tokens);
     }
 }
 
@@ -202,23 +143,114 @@ char **parse_line(char *line)
     return tokens;
 }
 
-static bool repl_add(const char **tokens, trie *t)
+static bool repl_add(trie *t, char **tokens)
 {
     char *word = *(tokens + 1);
     if (word == NULL) {
 	fprintf(stderr, "Word is not provided\n");
 	return false;
     }
-    put(t, word);
+    if (!put(t, word)) {
+	fprintf(stderr, "Invalid word\n");
+    }
     return false;
 }
 
-static void generate_svg_from_dot(char **args)
+static bool repl_delete(trie *t, char **tokens)
 {
-    if (fork() == 0) {
-	execvp("dot", args);
-	printf("Unknown args\n");
+    char *word = *(tokens + 1);
+    if (word == NULL) {
+	fprintf(stderr, "Word is not provided\n");
+	return false;
     }
+    if (!delete(t, word)) {
+	fprintf(stderr, "Word doesn't exist\n");
+    }
+    return false;
+}
+
+static bool repl_check(trie *t, char **tokens)
+{
+    char *word = *(tokens + 1);
+    if (word == NULL) {
+	fprintf(stderr, "Word is not provided\n");
+	return false;
+    }
+    if (check(t, word)) {
+	printf("%s\n", word);
+    }
+    return false;
+}
+
+static bool repl_load(trie *t, char **tokens)
+{
+    char *file_name = *(tokens + 1);
+    if (file_name == NULL) {
+	fprintf(stderr, "File name not provided\n");
+	return false;
+    }
+    FILE *fp = fopen(file_name, "r");
+    if (fp == NULL) {
+	fprintf(stderr, "File couldn't be opened\n");
+	return false;
+    }
+    build_trie(fp, t);
+    fclose(fp);
+    return false;
+}
+
+static bool repl_visualize(trie *t, char **tokens)
+{
+    char *out_name = *(tokens + 1);
+    if (out_name == NULL) {
+	fprintf(stderr, "Output file name not provided\n");
+	return false;
+    }
+
+    char dot_out_name[strlen(out_name) + FILE_EXTENSION_LEN];
+    GENERATE_FILE_NAME(dot_out_name, out_name, ".dot");
+
+    char svg_out_name[strlen(out_name) + FILE_EXTENSION_LEN];
+    GENERATE_FILE_NAME(svg_out_name, out_name, ".svg");
+
+    FILE *dot_fp = fopen(dot_out_name, "w");
+    if (dot_fp == NULL) {
+	fprintf(stderr, "File couldn't be opened\n");
+	return false;
+    }
+
+    visualize_trie(dot_fp, dot_out_name, svg_out_name, t);
+    fclose(dot_fp);
+
+    return false;
+}
+
+static bool repl_generate(trie *t, char **tokens)
+{
+    char *out_name = *(tokens + 1);
+    if (out_name == NULL) {
+	fprintf(stderr, "Output file name not provided\n");
+	return false;
+    }
+
+    char txt_name[strlen(out_name) + FILE_EXTENSION_LEN];
+    GENERATE_FILE_NAME(txt_name, out_name, ".txt");
+
+    FILE *txt_fp = fopen(txt_name, "w");
+    generate_txt_file(txt_fp, t);
+    fclose(txt_fp);
+
+    return false;
+}
+
+static bool repl_complete(trie *t, char **tokens)
+{
+    if (*(tokens + 1) != NULL) {
+	fprintf(stderr, "More than one word provided\n");
+	return false;
+    }
+    complete(t, *tokens);
+    return false;
 }
 
 static void build_trie(FILE *fp, trie *t)
@@ -242,23 +274,23 @@ static void build_trie(FILE *fp, trie *t)
 
 static enum REPL_COMMAND get_command(const char *token)
 {
-    if (strncmp(*token, ".add", COMMAND_STRNCMP_LEN(".add")) == 0)
+    if (strncmp(token, ".add", COMMAND_STRNCMP_LEN(".add")) == 0)
 	return ADD;
-    if (strncmp(*token, ".delete", COMMAND_STRNCMP_LEN(".delete")) == 0)
+    if (strncmp(token, ".delete", COMMAND_STRNCMP_LEN(".delete")) == 0)
 	return DELETE;
-    if (strncmp(*token, ".check", COMMAND_STRNCMP_LEN(".check")) == 0)
+    if (strncmp(token, ".check", COMMAND_STRNCMP_LEN(".check")) == 0)
 	return CHECK;
-    if (strncmp(*token, ".load", COMMAND_STRNCMP_LEN(".load")) == 0)
+    if (strncmp(token, ".load", COMMAND_STRNCMP_LEN(".load")) == 0)
 	return LOAD;
-    if (strncmp(*token, ".visualize", COMMAND_STRNCMP_LEN(".visualize")) == 0)
+    if (strncmp(token, ".visualize", COMMAND_STRNCMP_LEN(".visualize")) == 0)
 	return VISUALIZE;
-    if (strncmp(*token, ".generate", COMMAND_STRNCMP_LEN(".generate")) == 0)
+    if (strncmp(token, ".generate", COMMAND_STRNCMP_LEN(".generate")) == 0)
 	return GENERATE;
 #ifdef DEBUG
-    if (strncmp(*token, ".print", COMMAND_STRNCMP_LEN(".print")) == 0)
+    if (strncmp(token, ".print", COMMAND_STRNCMP_LEN(".print")) == 0)
 	return PRINT;
 #endif
-    if (strncmp(*token, ".quit", COMMAND_STRNCMP_LEN(".quit")) == 0)
+    if (strncmp(token, ".quit", COMMAND_STRNCMP_LEN(".quit")) == 0)
 	return QUIT;
     return COMPLETION;
 }
