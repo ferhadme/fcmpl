@@ -7,7 +7,7 @@ BINDIR = bin
 BUILDDIR = build
 TESTDIR = tests
 TARGET = fcmpl
-TEST_TARGET = $(BUILDDIR)/$(TARGET)_test
+TEST_TARGET = $(BINDIR)/$(TARGET)_test
 
 SOURCES = $(wildcard $(SRCDIR)/*.c) $(wildcard $(LIBDIR)/*.c)
 OBJECTS = $(addprefix $(BUILDDIR)/, $(notdir $(SOURCES:.c=.o)))
