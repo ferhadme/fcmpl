@@ -1,38 +1,36 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -pedantic
-DEBUG_FLAG = -D DEBUG
+CFLAGS = -Wall -Wextra -Wpedantic -std=c11
+DEBUGFLAGS = -D DEBUG
+SRCDIR = src
+LIBDIR = lib
+BINDIR = bin
+BUILDDIR = build
+TESTDIR = tests
+TARGET = fcmpl
+TEST_TARGET = $(BUILDDIR)/$(TARGET)_test
 
-LIB_SRC = lib/trie.c
-LIB_OBJ = trie.o
-LIB_INCLUDE_FLAG = $(addprefix -I,$(LIB_DIR))
-SRC = src/main.c src/repl.c
-TEST = tests/trie_test.c
-BUILD = build
+SOURCES = $(wildcard $(SRCDIR)/*.c) $(wildcard $(LIBDIR)/*.c)
+OBJECTS = $(addprefix $(BUILDDIR)/, $(notdir $(SOURCES:.c=.o)))
 
-PNAME = fcmpl
-TARGET_EXEC = $(BUILD)/$(PNAME)
-TEST_TARGET = $(BUILD)/$(PNAME)
-MKDIR_P = mkdir -p
+$(shell mkdir -p $(BINDIR) $(BUILDDIR))
 
-debug: $(LIB_OBJ)
-	$(CC) $(DEBUG_FLAG) $(CFLAGS) -o $(TARGET_EXEC) $(SRC) $(DEPS)/$(LIB_OBJ_NAME)
+ifeq ($(DEBUG), true)
+	CFLAGS += $(DEBUGFLAGS)
+endif
 
-release:
-	$(CC) $(LIB_FLAG) $(CFLAGS) -o $(TARGET_EXEC) $(SRC)
+$(BINDIR)/$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) $^ -o $@
 
-test:
-	$(MKDIR_P) $(BUILD) $(DEPS)
-	$(CC) $(LIB_FLAG) $(DEBUG_FLAG) $(CFLAGS) -o $(TEST_TARGET) $(TEST)
-	./fcmpl_test
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -I$(LIBDIR) -c $< -o $@
 
-$(LIB_OBJ):
-	$(CC) -c $(LIB_SRC) -o $(DEPS)/$(LIB_OBJ)
+$(BUILDDIR)/%.o: $(LIBDIR)/%.c
+	$(CC) $(CFLAGS) -I$(LIBDIR) -c $< -o $@
 
-$(DEPS): $(BUILD)
-	$(MKDIR_P) $(BUILD)/deps
-
-$(BUILD):
-	$(MKDIR_P) $(BUILD)
-
+.PHONY: clean
 clean:
-	rm -rf $(BUILD)/*
+	rm -rf $(BUILDDIR) $(BINDIR)
+
+.PHONY: test
+test:
+	$(CC) $(CFLAGS) -D DEBUG -I$(LIBDIR) $(LIBDIR)/trie.c $(TESTDIR)/trie_test.c -o $(TEST_TARGET) && ./$(TEST_TARGET)
