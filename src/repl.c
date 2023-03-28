@@ -279,6 +279,7 @@ static void build_trie(FILE *fp, trie *t)
 #endif
 
     while (getline(&line, &len, fp) != -1) {
+	if (line[0] == '#') continue;
 	line[strcspn(line, "\n")] = 0;
 	if (!put(t, line)) {
 #ifdef DEBUG
