@@ -2,7 +2,6 @@
  * Copyright (c) 2023, Farhad Mehdizada
  */
 
-
 #ifndef TRIE_H
 #define TRIE_H
 
