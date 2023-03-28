@@ -120,14 +120,6 @@ static void check_test(trie *trie)
 }
 
 /*
- * Asserts that reduntant nodes removed after rebalance operation
- */
-static void assert_reduntant_nodes_removed(node *root, const char *word)
-{
-    // TODO
-}
-
-/*
  * Assuming that delete_test(trie) called after put_test(trie), so there are some data in trie to test delete function
  * DELETE_THRESHOLD is 1 for DEBUG mode, so trie should be rebalanced after every single deletion
  */
@@ -135,6 +127,8 @@ static void delete_and_rebalancing_test(trie *trie)
 {
     node *root = trie->root;
     unsigned int trie_size = trie->size;
+    int aidx = hash('a');
+
 /*
 
        .
@@ -172,9 +166,6 @@ C* Z*  B*
 D*
 
  */
-    assert_branch_exists(root, "abcd");
-    assert_branch_exists(root, "abz");
-
     assert(!delete(trie, "abcde"));
     assert(!check(trie, "abcde"));
     assert(trie->size == trie_size);
@@ -196,8 +187,34 @@ D*
    Z*  B*
 
  */
-    assert_branch_exists(root, "abz");
+    node *l1_a = *(root->children + aidx);
+    assert(l1_a != NULL && l1_a->ch == 'a');
 
+    assert(delete(trie, "abz"));
+    assert(delete(trie, "a"));
+/*
+
+       .
+       |  \
+       C   D
+       |    \
+       A     B*
+       |
+       B*
+
+ */
+    assert(*(root->children + aidx) == NULL);
+
+    assert(delete(trie, "cab"));
+    assert(delete(trie, "db"));
+/*
+
+       .
+
+ */
+    for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
+	assert(*(root->children + i) == NULL);
+    }
 
     printf("All assertions passed for delete\n");
 }
@@ -209,7 +226,7 @@ int main(void) {
     trie *trie = create_trie();
     put_test(trie);
     check_test(trie);
-    delete_test(trie);
+    delete_and_rebalancing_test(trie);
     printf("All tests are passed\n");
     free_trie(trie);
     return 0;

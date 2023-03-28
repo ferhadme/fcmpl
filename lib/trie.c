@@ -158,7 +158,7 @@ static void rebuild_trie_if_threshold_passed(trie *t)
     t->delete_threshold = 0;
 }
 
-#if DEBUG
+#if 0
 static void debug_node(const node *n)
 {
     printf("Node { ch = %c, eow = %i }\n", n->ch, n->eow);
