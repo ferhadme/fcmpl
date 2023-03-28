@@ -50,6 +50,9 @@ static void rebuild_trie_if_threshold_passed(trie *t);
 static enum NODE_TYPE clean_orphan_nodes(node *n);
 static void free_orphan_node(node *n);
 static void generate_svg_from_dot(char **args);
+#ifdef DEBUG
+static void visualize_trie_debug(const trie *t);
+#endif
 
 trie *create_trie()
 {
@@ -67,6 +70,7 @@ trie *create_trie()
 
     t->root = root;
     t->size = 0;
+    t->delete_threshold = 0;
     return t;
 }
 
@@ -98,8 +102,20 @@ bool put(trie *t, const char *word)
     int idx = hash(*word);
     *(t->root->children + idx) = put_node(*(t->root->children + idx), word);
     t->size++;
+#ifdef DEBUG
+    visualize_trie_debug(t);
+#endif
     return true;
 }
+
+#ifdef DEBUG
+static void visualize_trie_debug(const trie *t)
+{
+    FILE *dot_fp = fopen("out.dot", "w");
+    visualize_trie(dot_fp, "out.dot", "out.svg", t);
+    fclose(dot_fp);
+}
+#endif
 
 static node *put_node(node *parent, const char *word)
 {
@@ -134,6 +150,9 @@ bool delete(trie *t, const char *word)
     t->size--;
     t->delete_threshold++;
     rebuild_trie_if_threshold_passed(t);
+#ifdef DEBUG
+    visualize_trie_debug(t);
+#endif
     return true;
 }
 
@@ -144,7 +163,9 @@ static void rebuild_trie_if_threshold_passed(trie *t)
 {
     if (t->delete_threshold < DELETE_THRESHOLD) return;
 
-    printf("INFO: rebuilding the trie...\n");
+#ifdef DEBUG
+    printf("[DEBUG] Rebuilding the trie...\n");
+#endif
     node *root = t->root;
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
 	node *child = *(root->children + i);

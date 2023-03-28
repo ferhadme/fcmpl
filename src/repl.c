@@ -12,10 +12,22 @@
 #include "graphviz_cfg.h"
 
 #define BUFFER_SIZE 256
+
+/*
+ * Token delimiter in repl command
+ */
 #define COMMAND_DELIM " "
+
+/*
+ * Maximum size of tokens in repl command
+ */
 #define MAX_TOKEN_SIZE 2
 
 #define COMMAND_STRNCMP_LEN(str) (strlen(str) + 1)
+
+/*
+ * Generates target filename with base name and given extension
+ */
 #define GENERATE_FILE_NAME(target, src, ext)	\
     strcpy(target, src);			\
     strcpy((target) + strlen(src), ext);	\
@@ -262,13 +274,22 @@ static void build_trie(FILE *fp, trie *t)
     char * line = NULL;
     size_t len = 0;
 
-    printf("[INFO] Started to load file\n");
+#ifdef DEBUG
+    printf("[DEBUG] Started to load file\n");
+#endif
 
     while (getline(&line, &len, fp) != -1) {
 	line[strcspn(line, "\n")] = 0;
 	if (!put(t, line)) {
-	    printf("[INFO] Ignoring invalid word %s\n", line);
+#ifdef DEBUG
+	    printf("[DEBUG] Ignoring invalid word %s\n", line);
+#endif
 	}
+#ifdef DEBUG
+	else {
+	    printf("[DEBUG] Loading word - %s\n", line);
+	}
+#endif
     }
 
     if (line) {

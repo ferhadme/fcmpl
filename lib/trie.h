@@ -7,6 +7,9 @@
 
 #include <stdbool.h>
 
+/*
+ * Defines how many deletions needed to rebuild the trie
+ */
 #ifdef DEBUG
 #define DELETE_THRESHOLD 1
 #else

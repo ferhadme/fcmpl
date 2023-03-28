@@ -1,0 +1,10 @@
+application
+apple
+new
+news
+feed
+feeling
+base
+banana
+stack
+heap
