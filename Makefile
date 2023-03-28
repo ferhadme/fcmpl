@@ -1,17 +1,36 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c11 -pedantic
-SRC = src/main.c src/trie.c src/repl.c
-TESTSRC = src/test.c src/trie.c
+CFLAGS = -Wall -Wextra -Wpedantic -std=c11
+DEBUGFLAGS = -D DEBUG
+SRCDIR = src
+LIBDIR = lib
+BINDIR = bin
+BUILDDIR = build
+TESTDIR = tests
+TARGET = fcmpl
+TEST_TARGET = $(BUILDDIR)/$(TARGET)_test
 
-debug:
-	$(CC) -D DEBUG $(CFLAGS) -o fcmpl $(SRC)
+SOURCES = $(wildcard $(SRCDIR)/*.c) $(wildcard $(LIBDIR)/*.c)
+OBJECTS = $(addprefix $(BUILDDIR)/, $(notdir $(SOURCES:.c=.o)))
 
-release:
-	$(CC) $(CFLAGS) -o fcmpl $(SRC)
+$(shell mkdir -p $(BINDIR) $(BUILDDIR))
 
-test:
-	$(CC) -D DEBUG $(CFLAGS) -o fcmpl_test $(TESTSRC)
-	./fcmpl_test
+ifeq ($(DEBUG), true)
+	CFLAGS += $(DEBUGFLAGS)
+endif
 
+$(BINDIR)/$(TARGET): $(OBJECTS)
+	$(CC) $(CFLAGS) $^ -o $@
+
+$(BUILDDIR)/%.o: $(SRCDIR)/%.c
+	$(CC) $(CFLAGS) -I$(LIBDIR) -c $< -o $@
+
+$(BUILDDIR)/%.o: $(LIBDIR)/%.c
+	$(CC) $(CFLAGS) -I$(LIBDIR) -c $< -o $@
+
+.PHONY: clean
 clean:
-	rm fcmpl fcmpl_test
+	rm -rf $(BUILDDIR) $(BINDIR)
+
+.PHONY: test
+test:
+	$(CC) $(CFLAGS) -D DEBUG -I$(LIBDIR) $(LIBDIR)/trie.c $(TESTDIR)/trie_test.c -o $(TEST_TARGET) && ./$(TEST_TARGET)

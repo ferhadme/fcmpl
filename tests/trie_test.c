@@ -3,17 +3,19 @@
 #include <stdarg.h>
 #include <string.h>
 #include "trie.h"
-#include "test.h"
 
-static void node_test(const char *word, int n_ch, ...);
+static void node_test(const char *word, int n_ch, ...)
+{
+    char res[n_ch + 1];
+    va_list ptr;
+    va_start(ptr, n_ch);
+    for (int i = 0; i < n_ch; i++) {
+	res[i] = va_arg(ptr, int);
+    }
+    res[n_ch] = '\0';
+    va_end(ptr);
 
-int main(void) {
-    trie *trie = create_trie();
-    put_test(trie);
-    check_test(trie);
-    printf("All tests are passed\n");
-    free_trie(trie);
-    return 0;
+    assert(strcmp(word, res) == 0);
 }
 
 /*
@@ -27,7 +29,7 @@ C Z B
 |
 D
  */
-void put_test(trie *trie)
+static void put_test(trie *trie)
 {
     assert(put(trie, "ab"));
     assert(put(trie, "abc"));
@@ -85,24 +87,10 @@ void put_test(trie *trie)
     printf("All assertions passed for put\n");
 }
 
-static void node_test(const char *word, int n_ch, ...)
-{
-    char res[n_ch + 1];
-    va_list ptr;
-    va_start(ptr, n_ch);
-    for (int i = 0; i < n_ch; i++) {
-	res[i] = va_arg(ptr, int);
-    }
-    res[n_ch] = '\0';
-    va_end(ptr);
-
-    assert(strcmp(word, res) == 0);
-}
-
 /*
  * Assuming that check_test(trie) called after put_test(trie), so there are some data in trie to test check function
  */
-void check_test(trie *trie)
+static void check_test(trie *trie)
 {
     assert(check(trie, "a"));
     assert(check(trie, "abc"));
@@ -131,8 +119,9 @@ void check_test(trie *trie)
 /*
  * Assuming that delete_test(trie) called after put_test(trie), so there are some data in trie to test delete function
  */
-void delete_test(trie *trie)
+static void delete_test(trie *trie)
 {
+    // TODO: Write delete tests for rebalancing
     unsigned int trie_size = trie->size;
     assert(delete(trie, "ab"));
     assert(!check(trie, "ab"));
@@ -153,3 +142,14 @@ void delete_test(trie *trie)
 
     printf("All assertions passed for delete\n");
 }
+
+int main(void) {
+    trie *trie = create_trie();
+    put_test(trie);
+    check_test(trie);
+    delete_test(trie);
+    printf("All tests are passed\n");
+    free_trie(trie);
+    return 0;
+}
+

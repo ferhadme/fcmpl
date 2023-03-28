@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023, Farhad Mehdizada
+ */
+
 #ifndef REPL_H
 #define REPL_H
 

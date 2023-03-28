@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2023, Farhad Mehdizada
+ */
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
