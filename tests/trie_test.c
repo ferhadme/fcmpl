@@ -19,15 +19,18 @@ static void node_test(const char *word, int n_ch, ...)
 }
 
 /*
-    .
-   /|\
-  A C D
- /  |  \
- B  A   B
-/\  |
-C Z B
+ * Stars (*) indicates word terminator (eow)
+
+       .
+    /  |  \
+   A*  C   D
+  /    |    \
+ B*    A     B*
+ / \   |
+C*  Z* B*
 |
-D
+D*
+
  */
 static void put_test(trie *trie)
 {
@@ -117,20 +120,37 @@ static void check_test(trie *trie)
 }
 
 /*
- * Assuming that delete_test(trie) called after put_test(trie), so there are some data in trie to test delete function
+ * Asserts that reduntant nodes removed after rebalance operation
  */
-static void delete_test(trie *trie)
+static void assert_reduntant_nodes_removed(node *root, const char *word)
 {
-    // TODO: Write delete tests for rebalancing
+    // TODO
+}
+
+/*
+ * Assuming that delete_test(trie) called after put_test(trie), so there are some data in trie to test delete function
+ * DELETE_THRESHOLD is 1 for DEBUG mode, so trie should be rebalanced after every single deletion
+ */
+static void delete_and_rebalancing_test(trie *trie)
+{
+    node *root = trie->root;
     unsigned int trie_size = trie->size;
+/*
+
+       .
+    /  |  \
+   A*  C   D
+  /    |    \
+ B*    A     B*
+ / \   |
+C*  Z* B*
+|
+D*
+
+ */
     assert(delete(trie, "ab"));
     assert(!check(trie, "ab"));
     trie_size--;
-    assert(trie->size == trie_size);
-
-    assert(!delete(trie, "abcde"));
-    assert(!check(trie, "abcde"));
-    assert(trie->size == trie_size);
 
     assert(!delete(trie, "./,"));
     assert(!check(trie, "./,"));
@@ -139,11 +159,53 @@ static void delete_test(trie *trie)
     assert(!delete(trie, ""));
     assert(!check(trie, ""));
     assert(trie->size == trie_size);
+/*
+
+       .
+    /  |  \
+   A*  C   D
+  /    |    \
+ B     A     B*
+/ \    |
+C* Z*  B*
+|
+D*
+
+ */
+    assert_branch_exists(root, "abcd");
+    assert_branch_exists(root, "abz");
+
+    assert(!delete(trie, "abcde"));
+    assert(!check(trie, "abcde"));
+    assert(trie->size == trie_size);
+
+    assert(delete(trie, "abcd"));
+    assert(delete(trie, "abc"));
+    assert(!check(trie, "abcd"));
+    assert(!check(trie, "abc"));
+    trie_size -= 2;
+    assert(trie->size == trie_size);
+/*
+
+       .
+    /  |  \
+   A*  C   D
+  /    |    \
+ B     A     B*
+  \    |
+   Z*  B*
+
+ */
+    assert_branch_exists(root, "abz");
+
 
     printf("All assertions passed for delete\n");
 }
 
 int main(void) {
+#ifndef DEBUG
+    static_assert(0 && "DEBUG mode is not enabled");
+#endif
     trie *trie = create_trie();
     put_test(trie);
     check_test(trie);

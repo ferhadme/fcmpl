@@ -1,3 +1,4 @@
 1. Write unit test for rebalancing trie
+2. Add comments for functions
 2. Refactor DEBUG-flag specific codes (svg live preview)
 3. Add auto-completion and syntax highlighting to REPL

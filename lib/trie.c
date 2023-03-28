@@ -15,11 +15,6 @@
 #define IS_VALID_CHAR(ch) (IS_CPTL_LTR(ch) || IS_LWR_LTR(ch))
 
 /*
- * [A-Za-z]
- */
-#define NUMBER_OF_LETTERS 52
-
-/*
  * Character dot (.) is allocated for root of trie
  */
 #define ROOT_CHAR '.'

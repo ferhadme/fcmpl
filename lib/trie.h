@@ -13,6 +13,11 @@
 #define DELETE_THRESHOLD 50
 #endif
 
+/*
+ * [A-Za-z]
+ */
+#define NUMBER_OF_LETTERS 52
+
 typedef struct node
 {
     char ch;
