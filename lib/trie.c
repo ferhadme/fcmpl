@@ -77,6 +77,18 @@ void free_trie(trie *t)
     free(t);
 }
 
+void reset_trie(trie *t)
+{
+    node *root = t->root;
+    for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
+	node *child = *(root->children + i);
+	free_node(child);
+	*(root->children + i) = NULL;
+    }
+    t->size = 0;
+    t->delete_threshold = 0;
+}
+
 static void free_node(node *n)
 {
     if (n == NULL) {

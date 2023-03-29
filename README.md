@@ -91,3 +91,5 @@ After certain number of deletions, trie should be balanced for better performanc
 Before Rebalance                               |  After Rebalance
 :---------------------------------------------:|:--------------------------------------------:
 ![Before Rebalance](res/before-rebalance.svg)  |  ![After Rebalance](res/after-rebalance.svg)
+
+### Memory Leak test

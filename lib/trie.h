@@ -52,6 +52,8 @@ bool check(const trie *t, const char *word);
 
 void complete(const trie *t, const char *word);
 
+void reset_trie(trie *t);
+
 #ifdef DEBUG
 void print_trie(const trie *t);
 #endif

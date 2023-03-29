@@ -41,6 +41,8 @@ enum REPL_COMMAND {
     CHECK,
     /* Loads list of valid words from file (separated by newline) */
     LOAD,
+    /* Resets trie (removes all nodes except root)*/
+    RESET,
     /* Generates file from word tree (reverse process of load) */
     GENERATE,
     /* Visualizes word tree with graph (svg and dot file) */
@@ -64,6 +66,7 @@ static bool repl_load(trie *t, char **tokens);
 static bool repl_visualize(trie *t, char **tokens);
 static bool repl_generate(trie *t, char **tokens);
 static bool repl_complete(trie *t, char **tokens);
+static bool repl_reset_trie(trie *t);
 static void build_trie(FILE *fp, trie *t);
 static enum REPL_COMMAND get_command(const char *token);
 
@@ -80,6 +83,8 @@ bool execute(trie *t, char **tokens)
 	return repl_check(t, tokens);
     case LOAD:
 	return repl_load(t, tokens);
+    case RESET:
+	return repl_reset_trie(t);
     case VISUALIZE:
 	return repl_visualize(t, tokens);
     case GENERATE:
@@ -284,6 +289,15 @@ static bool repl_complete(trie *t, char **tokens)
     return false;
 }
 
+static bool repl_reset_trie(trie *t)
+{
+    reset_trie(t);
+#ifdef DEBUG
+    visualize_trie_debug(t);
+#endif
+    return false;
+}
+
 static void build_trie(FILE *fp, trie *t)
 {
     char * line = NULL;
@@ -326,6 +340,8 @@ static enum REPL_COMMAND get_command(const char *token)
 	return LOAD;
     if (strncmp(token, ".visualize", COMMAND_STRNCMP_LEN(".visualize")) == 0)
 	return VISUALIZE;
+    if (strncmp(token, ".reset", COMMAND_STRNCMP_LEN(".reset")) == 0)
+	return RESET;
     if (strncmp(token, ".generate", COMMAND_STRNCMP_LEN(".generate")) == 0)
 	return GENERATE;
 #ifdef DEBUG
