@@ -33,25 +33,27 @@
     strcpy((target) + strlen(src), ext);	\
 
 enum REPL_COMMAND {
-    /* adds new word */
+    /* Adds new word */
     ADD,
-    /* deletes existing word */
+    /* Deletes existing word */
     DELETE,
-    /* checks whether word exists */
+    /* Checks whether word exists */
     CHECK,
-    /* loads list of valid words from file (separated by newline) */
+    /* Loads list of valid words from file (separated by newline) */
     LOAD,
-    /* generates file from word tree (reverse process of load) */
+    /* Generates file from word tree (reverse process of load) */
     GENERATE,
-    /* visualizes word tree with graph (svg and dot file) */
+    /* Visualizes word tree with graph (svg and dot file) */
     VISUALIZE,
-    /* terminates REPL */
+    /* Cleans terminal screen */
+    CLEAN,
+    /* Terminates REPL */
     QUIT,
 #ifdef DEBUG
-    /* prints tree in readable format (for debugging) */
+    /* Prints tree in readable format (for debugging) */
     PRINT,
 #endif
-    /* assumes that input is not special command and completes given word */
+    /* Assumes that input is not special command and completes given word */
     COMPLETION
 };
 
@@ -87,6 +89,9 @@ bool execute(trie *t, char **tokens)
 	print_trie(t);
 	return false;
 #endif
+    case CLEAN:
+	system("clear");
+	return false;
     case QUIT:
 	return true;
     default:
@@ -169,6 +174,11 @@ static bool repl_add(trie *t, char **tokens)
     if (!put(t, word)) {
 	fprintf(stderr, "Invalid word\n");
     }
+#ifdef DEBUG
+    else {
+	visualize_trie_debug(t);
+    }
+#endif
     return false;
 }
 
@@ -182,6 +192,11 @@ static bool repl_delete(trie *t, char **tokens)
     if (!delete(t, word)) {
 	fprintf(stderr, "Word doesn't exist\n");
     }
+#ifdef DEBUG
+    else {
+	visualize_trie_debug(t);
+    }
+#endif
     return false;
 }
 
@@ -289,6 +304,7 @@ static void build_trie(FILE *fp, trie *t)
 #ifdef DEBUG
 	else {
 	    printf("[DEBUG] Loading word - %s\n", line);
+	    visualize_trie_debug(t);
 	}
 #endif
     }
@@ -316,6 +332,8 @@ static enum REPL_COMMAND get_command(const char *token)
     if (strncmp(token, ".print", COMMAND_STRNCMP_LEN(".print")) == 0)
 	return PRINT;
 #endif
+    if (strncmp(token, ".clean", COMMAND_STRNCMP_LEN(".clean")) == 0)
+	return CLEAN;
     if (strncmp(token, ".quit", COMMAND_STRNCMP_LEN(".quit")) == 0)
 	return QUIT;
     return COMPLETION;

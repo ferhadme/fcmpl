@@ -12,7 +12,7 @@
 #define COMMAND_PROMPT "> "
 #define FREE_INPUT(tokens, line)		\
     free(tokens);				\
-    free(line);					\
+    free(line);
 
 char *get_line();
 char **parse_line(char *line);

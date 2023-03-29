@@ -21,6 +21,11 @@
  */
 #define NUMBER_OF_LETTERS 52
 
+/*
+ * Maximum trie size allowed to build graph visualizer
+ */
+#define GRAPH_VISUALIZER_LIMIT 30
+
 typedef struct node
 {
     char ch;
@@ -56,6 +61,10 @@ void generate_txt_file(FILE *fp, const trie *t);
 void generate_dot_file(FILE *fp, const trie *t);
 
 void visualize_trie(FILE *dot_fp, char *dot_out_name, char *svg_out_name, const trie *t);
+
+#ifdef DEBUG
+void visualize_trie_debug(const trie *t);
+#endif
 
 int hash(char ch);
 

@@ -50,9 +50,6 @@ static void rebuild_trie_if_threshold_passed(trie *t);
 static enum NODE_TYPE clean_orphan_nodes(node *n);
 static void free_orphan_node(node *n);
 static void generate_svg_from_dot(char **args);
-#ifdef DEBUG
-static void visualize_trie_debug(const trie *t);
-#endif
 
 trie *create_trie()
 {
@@ -102,14 +99,11 @@ bool put(trie *t, const char *word)
     int idx = hash(*word);
     *(t->root->children + idx) = put_node(*(t->root->children + idx), word);
     t->size++;
-#ifdef DEBUG
-    visualize_trie_debug(t);
-#endif
     return true;
 }
 
 #ifdef DEBUG
-static void visualize_trie_debug(const trie *t)
+void visualize_trie_debug(const trie *t)
 {
     FILE *dot_fp = fopen("out.dot", "w");
     visualize_trie(dot_fp, "out.dot", "out.svg", t);
@@ -150,9 +144,6 @@ bool delete(trie *t, const char *word)
     t->size--;
     t->delete_threshold++;
     rebuild_trie_if_threshold_passed(t);
-#ifdef DEBUG
-    visualize_trie_debug(t);
-#endif
     return true;
 }
 
@@ -338,6 +329,10 @@ static node *get_final_node(node *n, const char *word)
 
 void visualize_trie(FILE *dot_fp, char *dot_out_name, char *svg_out_name, const trie *t)
 {
+    if (t->size > GRAPH_VISUALIZER_LIMIT) {
+	fprintf(stderr, "Size of trie has reached to graph visualizer limit\n");
+	return;
+    }
     generate_dot_file(dot_fp, t);
 
     char *args[] = {
