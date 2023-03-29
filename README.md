@@ -1,7 +1,7 @@
 # fcmpl
 
 ### Description
-An Auto Completion Engine that uses a Prefix Tree (also known as Trie). Can be used for implementing auto completion, where the engine suggests possible word completions (also does other things like spell-checking, generating dictionary graph, loading dictionary) based on the characters entered so far.
+An Auto Completion Engine that uses a Prefix Tree (also known as Trie). Can be used for implementing auto completion, where the engine suggests possible word completions based on the characters entered so far (also does other things like spell-checking, generating dictionary graph, loading dictionary).
 
 ### Dependencies
 [Graphviz](https://graphviz.org/) is used for visualizing tree. See [Tree Visualization](#tree-visualization)
@@ -93,3 +93,5 @@ Before Rebalance                               |  After Rebalance
 ![Before Rebalance](res/before-rebalance.svg)  |  ![After Rebalance](res/after-rebalance.svg)
 
 ### Memory Leak test
+Valgrind memory leak possibility test result with 999 word insertions and deletions:
+![Valgrind result](res/valgrind-memory-result.png)
