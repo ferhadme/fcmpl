@@ -330,7 +330,8 @@ static node *get_final_node(node *n, const char *word)
 void visualize_trie(FILE *dot_fp, char *dot_out_name, char *svg_out_name, const trie *t)
 {
     if (t->size > GRAPH_VISUALIZER_LIMIT) {
-	fprintf(stderr, "Size of trie has reached to graph visualizer limit\n");
+	fprintf(stderr, "Size of trie [%d] has reached to graph visualizer limit [%d]\n",
+		t->size, GRAPH_VISUALIZER_LIMIT);
 	return;
     }
     generate_dot_file(dot_fp, t);

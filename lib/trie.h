@@ -11,7 +11,7 @@
  * Defines how many deletions needed to rebuild the trie
  */
 #ifdef DEBUG
-#define DELETE_THRESHOLD 1
+#define DELETE_THRESHOLD 5
 #else
 #define DELETE_THRESHOLD 50
 #endif
