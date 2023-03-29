@@ -128,6 +128,8 @@ static void delete_and_rebalancing_test(trie *trie)
     node *root = trie->root;
     unsigned int trie_size = trie->size;
     int aidx = hash('a');
+    int cidx = hash('c');
+    int didx = hash('d');
 
 /*
 
@@ -144,14 +146,17 @@ D*
  */
     assert(delete(trie, "ab"));
     assert(!check(trie, "ab"));
+    assert(trie->delete_threshold == 1);
     trie_size--;
 
     assert(!delete(trie, "./,"));
     assert(!check(trie, "./,"));
+    assert(trie->delete_threshold == 1);
     assert(trie->size == trie_size);
 
     assert(!delete(trie, ""));
     assert(!check(trie, ""));
+    assert(trie->delete_threshold == 1);
     assert(trie->size == trie_size);
 /*
 
@@ -176,6 +181,7 @@ D*
     assert(!check(trie, "abc"));
     trie_size -= 2;
     assert(trie->size == trie_size);
+    assert(trie->delete_threshold == 3);
 /*
 
        .
@@ -183,15 +189,19 @@ D*
    A*  C   D
   /    |    \
  B     A     B*
-  \    |
-   Z*  B*
+/ \    |
+C  Z*  B*
+|
+D
 
  */
     node *l1_a = *(root->children + aidx);
     assert(l1_a != NULL && l1_a->ch == 'a');
 
     assert(delete(trie, "abz"));
-    assert(delete(trie, "a"));
+    assert(trie->delete_threshold == 4);
+    assert(delete(trie, "a")); // Rebalancing happens here
+    assert(trie->delete_threshold == 0);
 /*
 
        .
@@ -205,15 +215,11 @@ D*
  */
     assert(*(root->children + aidx) == NULL);
 
-    assert(delete(trie, "cab"));
-    assert(delete(trie, "db"));
-/*
-
-       .
-
- */
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
-	assert(*(root->children + i) == NULL);
+	node *child = *(root->children + i);
+	assert((i == cidx || i == didx) ?
+	       child != NULL :
+	       child == NULL);
     }
 
     printf("All assertions passed for delete\n");
