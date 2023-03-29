@@ -4,7 +4,7 @@
 An Auto Completion Engine that uses a Prefix Tree (also known as Trie). Can be used for implementing auto completion, where the engine suggests possible word completions based on the characters entered so far (also does other things like spell-checking, generating dictionary graph, loading dictionary).
 
 ### Dependencies
-[Graphviz](https://graphviz.org/) is used for visualizing tree. See [Tree Visualization](#tree-visualization)
+[Graphviz](https://graphviz.org/) is used for visualizing tree. See [Trie Visualization](#trie-visualization)
 
 [Installation instructions for Graphviz](https://graphviz.org/download/)
 
