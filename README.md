@@ -26,8 +26,8 @@ $ make clean
 
 ### Character set
 [A-Za-z] are supported as a character set, but can be easily extended by modifying:
-- ```c #define NUMBER_OF_LETTERS 52``` macro that defines number of acceptable letters
-- ```c int hash(char ch)``` function to choose unique slot between [0 .. NUMBER_OF_LETTERS]
+- ```#define NUMBER_OF_LETTERS 52``` macro that defines number of acceptable letters
+- ```int hash(char ch)``` function to choose unique slot between [0 .. NUMBER_OF_LETTERS]
 
 ### Supported operations
 - Adding new word
@@ -67,7 +67,7 @@ $
 ### Trie Visualization
 Trie can be visualized with **.visualize** operation
 
-If [res/9-words.txt][res/9-words.txt] is taken as a dictionary file, then two files will be generated after **.visualize** operation.
+If [res/9-words.txt](res/9-words.txt) is taken as a dictionary file, then two files will be generated after **.visualize** operation.
 - out.dot
 - out.svg
 
@@ -83,7 +83,7 @@ digraph {
 
 out.svg
 
-![Svg generated from dictionary](res/out.svg)
+<img src="res/out.svg" alt="Svg generated from trie" width="1000" height="800" align="center"/>
 
 ### DELETE_THRESHOLD for Rebalancing Trie
 After certain number of deletions, trie should be balanced for better performance and memory by removing orphan nodes. DELETE_THRESHOLD is macro and equals to 50 (in compilation with DEBUG flag, equals to 5). It means trie will be rebalanced after DELETE_THRESHOLD times deletions.
