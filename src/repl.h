@@ -9,7 +9,8 @@
 #include <stdbool.h>
 #include "trie.h"
 
-#define COMMAND_PROMPT "> "
+#define COMMAND_PROMPT "\x1B[33m> \x1B[0m"
+
 #define FREE_INPUT(tokens, line)		\
     free(tokens);				\
     free(line);
