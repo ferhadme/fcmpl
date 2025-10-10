@@ -11,8 +11,8 @@
 
 #define COMMAND_PROMPT "\x1B[33m> \x1B[0m"
 
-#define FREE_INPUT(tokens, line)		\
-    free(tokens);				\
+#define FREE_INPUT(tokens, line)                \
+    free(tokens);                               \
     free(line);
 
 char *get_line();

@@ -10,7 +10,7 @@ static void node_test(const char *word, int n_ch, ...)
     va_list ptr;
     va_start(ptr, n_ch);
     for (int i = 0; i < n_ch; i++) {
-	res[i] = va_arg(ptr, int);
+        res[i] = va_arg(ptr, int);
     }
     res[n_ch] = '\0';
     va_end(ptr);
@@ -21,17 +21,17 @@ static void node_test(const char *word, int n_ch, ...)
 /*
  * Stars (*) indicates word terminator (eow)
 
-       .
-    /  |  \
-   A*  C   D
-  /    |    \
+ .
+ /  |  \
+ A*  C   D
+ /    |    \
  B*    A     B*
  / \   |
-C*  Z* B*
-|
-D*
+ C*  Z* B*
+ |
+ D*
 
- */
+*/
 static void put_test(trie *trie)
 {
     assert(put(trie, "ab"));
@@ -133,17 +133,17 @@ static void delete_and_rebalancing_test(trie *trie)
 
 /*
 
-       .
-    /  |  \
-   A*  C   D
+  .
+  /  |  \
+  A*  C   D
   /    |    \
- B*    A     B*
- / \   |
-C*  Z* B*
-|
-D*
+  B*    A     B*
+  / \   |
+  C*  Z* B*
+  |
+  D*
 
- */
+*/
     assert(delete(trie, "ab"));
     assert(!check(trie, "ab"));
     assert(trie->delete_threshold == 1);
@@ -160,17 +160,17 @@ D*
     assert(trie->size == trie_size);
 /*
 
-       .
-    /  |  \
-   A*  C   D
+  .
+  /  |  \
+  A*  C   D
   /    |    \
- B     A     B*
-/ \    |
-C* Z*  B*
-|
-D*
+  B     A     B*
+  / \    |
+  C* Z*  B*
+  |
+  D*
 
- */
+*/
     assert(!delete(trie, "abcde"));
     assert(!check(trie, "abcde"));
     assert(trie->size == trie_size);
@@ -184,17 +184,17 @@ D*
     assert(trie->delete_threshold == 3);
 /*
 
-       .
-    /  |  \
-   A*  C   D
+  .
+  /  |  \
+  A*  C   D
   /    |    \
- B     A     B*
-/ \    |
-C  Z*  B*
-|
-D
+  B     A     B*
+  / \    |
+  C  Z*  B*
+  |
+  D
 
- */
+*/
     node *l1_a = *(root->children + aidx);
     assert(l1_a != NULL && l1_a->ch == 'a');
 
@@ -204,22 +204,22 @@ D
     assert(trie->delete_threshold == 0);
 /*
 
-       .
-       |  \
-       C   D
-       |    \
-       A     B*
-       |
-       B*
+  .
+  |  \
+  C   D
+  |    \
+  A     B*
+  |
+  B*
 
- */
+*/
     assert(*(root->children + aidx) == NULL);
 
     for (int i = 0; i < NUMBER_OF_LETTERS; i++) {
-	node *child = *(root->children + i);
-	assert((i == cidx || i == didx) ?
-	       child != NULL :
-	       child == NULL);
+        node *child = *(root->children + i);
+        assert((i == cidx || i == didx) ?
+               child != NULL :
+               child == NULL);
     }
 
     printf("All assertions passed for delete\n");
